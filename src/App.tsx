@@ -1,110 +1,90 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { client } from './contentful';
+import { DraggableGrid } from './components/DraggableGrid';
 
-interface ProfileFields {
-  name: string;
-  image?: {
-    fields: {
-      file: { url: string };
-      title?: string;
-    }
-  };
-  description: string;
-  contact: string;
-}
+type BlockData = { section: string; text: string; url?: string; bgColor: string };
+type NameEntry = { title: string };
 
-function App() {
-  const [profiles, setProfiles] = useState<ProfileFields[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+export default function App() {
+  const [title, setTitle] = useState('Loading title…');
+  const [blocks, setBlocks] = useState<BlockData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    client
-      .getEntries({ content_type: 'profile' })
-      .then((response) => {
-        if (response.items.length === 0) {
-          setError('No profiles found.');
-        } else {
-          setProfiles(response.items.map(item => item.fields as ProfileFields));
-        }
-      })
-      .catch(() => {
-        setError('Failed to load profiles.');
-      })
-      .finally(() => {
+    async function load() {
+      try {
+        const [nameRes, blockRes] = await Promise.all([
+          client.getEntries<NameEntry>({ content_type: 'name', limit: 1 }),
+          client.getEntries({ content_type: 'block', limit: 100 }),
+        ]);
+        const rawName = nameRes.items[0]?.fields.title;
+        setTitle(rawName ?? '—');
+
+        const data = blockRes.items.map(item => {
+          const f = item.fields as any;
+          return {
+            section: f.section,
+            text:    f.text,
+            url:     f.url,
+            bgColor: (f.color || '#eee').trim(),
+          };
+        });
+        setBlocks(data);
+      } catch (e) {
+        console.error(e);
+        setTitle('Error loading title');
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    load();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <svg
-          className="animate-spin h-8 w-8 text-blue-500"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"
-          />
-        </svg>
-      </div>
-    );
-  }
+  if (loading) return <div style={{ textAlign:'center', marginTop:40 }}>Loading…</div>;
 
-  if (error) {
-    return (
-      <div className="max-w-sm mx-auto p-6 mt-10 text-center text-red-500">
-        {error}
-      </div>
-    );
-  }
+  const bySection = blocks.reduce<Record<string, BlockData[]>>((acc, b) => {
+    (acc[b.section] = acc[b.section] || []).push(b);
+    return acc;
+  }, {});
+
+  // Convert BlockData[] → JSX[]
+  const makeItems = (arr: BlockData[]) =>
+    arr.map((b, i) => (
+      <span  className="draggable-grid__item"
+        key={i}
+        style={{
+          backgroundColor: b.bgColor,
+          padding: '8px 16px',
+        
+          display: 'inline-block',
+        }}
+      >
+        {b.text}
+      </span>
+    ));
 
   return (
-    <div className="max-w-4xl mx-auto p-6 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      {profiles.map(({ name, image, description, contact }, idx) => {
-        const imageUrl = image
-          ? `https:${image.fields.file.url}`
-          : '/placeholder-profile.png';
-        const imageAlt = image?.fields.title || name;
+    <div>
+      <h1
+        style={{
+          whiteSpace: 'pre-line',
+          width: '100%',
+          textAlign: 'center',
+         
+          fontWeight: 200,
+     
+          boxSizing: 'border-box',
+        }}
+      >
+        {title}
+      </h1>
 
-        return (
-          <div
-            key={idx}
-            className="shadow-lg rounded-xl p-6 flex flex-col items-center"
-          >
-            <img
-              src={imageUrl}
-              alt={imageAlt}
-              className="w-24 h-24 rounded-full"
-            />
-            <h2 className="mt-4 text-xl font-semibold">{name}</h2>
-            <p className="mt-2 whitespace-pre-line text-center">
-              {description}
-            </p>
-            <a
-              href={`mailto:${contact}`}
-              className="mt-3 text-blue-500 hover:underline"
-            >
-              {contact}
-            </a>
-          </div>
-        );
-      })}
+      <div style={{ maxWidth:800, margin:'0 auto', padding:0 }}>
+        <DraggableGrid items={makeItems(bySection.one || [])} />
+        <DraggableGrid items={makeItems(bySection.two || [])} />
+        <DraggableGrid items={makeItems(bySection.three || [])} />
+      </div>
     </div>
   );
 }
-
-export default App;

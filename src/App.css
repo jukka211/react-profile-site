@@ -1,42 +1,118 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+// src/App.tsx
+import React, { useEffect, useState } from 'react';
+import { client } from './contentful';
+import { DraggableGrid } from './components/DraggableGrid';
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+type BlockData = {
+  section: 'one' | 'two' | 'three';
+  text: string;
+  url?: string;
+  bgColor: string;
+};
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+type NameEntry = { name: string };
+
+export default function App() {
+  const [title, setTitle] = useState('');
+  const [blocks, setBlocks] = useState<BlockData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      client.getEntries<NameEntry>({ content_type: 'name', limit: 1 }),
+      client.getEntries({ content_type: 'block', limit: 100 }),
+    ])
+      .then(([nameRes, blockRes]) => {
+        if (nameRes.items.length) {
+          setTitle(nameRes.items[0].fields.name);
+        }
+        const data: BlockData[] = blockRes.items.map((item) => {
+          const f = item.fields as any;
+          return {
+            section: f.section,
+            text: f.text,
+            url: f.url,
+            bgColor: f.color, // <-- use the new “color” field
+          };
+        });
+        console.log('Mapped blocks:', data);
+        setBlocks(data);
+      })
+      .catch((e) => {
+        console.error(e);
+        setError('Failed to load content.');
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div style={{ textAlign: 'center', marginTop: 40 }}>Loading…</div>;
   }
-  to {
-    transform: rotate(360deg);
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', marginTop: 40, color: 'red' }}>
+        {error}
+      </div>
+    );
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
+  const bySection = blocks.reduce<Record<string, BlockData[]>>((acc, b) => {
+    (acc[b.section] = acc[b.section] || []).push(b);
+    return acc;
+  }, {});
 
-.card {
-  padding: 2em;
-}
+  const renderItems = (arr: BlockData[]) =>
+    arr.map((b, i) =>
+      b.url ? (
+        <a
+          key={i}
+          href={b.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-block',
+            backgroundColor: b.bgColor,
+            color: '#000',
+            padding: '8px 16px',
+            borderRadius: '1px',
+            textDecoration: 'none',
+            userSelect: 'none',
+            cursor: 'move',
+          }}
+        >
+          {b.text}
+        </a>
+      ) : (
+        <span
+          key={i}
+          style={{
+            display: 'inline-block',
+            backgroundColor: b.bgColor,
+            color: '#000',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            userSelect: 'none',
+            cursor: 'move',
+          }}
+        >
+          {b.text}
+        </span>
+      )
+    );
 
-.read-the-docs {
-  color: #888;
+  return (
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
+      <h1 style={{ textAlign: 'center', fontSize: 32 }}>{title}</h1>
+
+      {/* 2. Grid “one” */}
+      <DraggableGrid>{renderItems(bySection.one || [])}</DraggableGrid>
+
+      {/* 3. Grid “two” */}
+      <DraggableGrid>{renderItems(bySection.two || [])}</DraggableGrid>
+
+      {/* 4. Grid “three” */}
+      <DraggableGrid>{renderItems(bySection.three || [])}</DraggableGrid>
+    </div>
+  );
 }

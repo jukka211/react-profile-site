@@ -1,0 +1,29 @@
+.draggable-grid__item {
+    display: inline-block;
+    padding: 0px 0px;
+    border-radius: 29px;
+    user-select: none;
+    cursor: move;
+  
+    /* fluid font-size: never below 1.25rem, scales at 4vw, caps at 3rem */
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+  
+    background: transparent;
+  }
+  
+  /* your title responsive too */
+  h1 {
+    width: 100%;
+    margin: 0;
+    padding-top: 06rem;
+    box-sizing: border-box;
+    text-align: center;
+  
+    /* fluid title: min 3rem, ideal 10vw, max 12rem */
+    font-size: clamp(1rem, 15vw, 20rem);
+  
+    font-weight: 200;
+    line-height: 0.9;
+    overflow-wrap: break-word;
+  }
+  

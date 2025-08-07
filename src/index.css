@@ -1,58 +1,71 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@font-face {
+  font-family: 'TimesDot';
+  src: url('TimesDotRom.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+.page-title {
+  /* allow newline characters in the text to turn into real line breaks */
+  white-space: pre-line;
 
-body {
+  /* your existing styles */
+  width: 100%;
+  text-align: center;
+
+  font-weight: 200;
   margin: 0;
+  padding: 1rem 0;
+  box-sizing: border-box;
+}
+
+
+/* 2. Apply it globally (optional) */
+body {
+  font-family: 'TimesDot';
+  line-height: 1.5;
+}
+.word-grid {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  font-size: 56px;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.word-block {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+font-size: 56px;
+  user-select: none;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+  color: #111;               /* ensure text is visible */
+  text-decoration: none;     /* reset link styles */
+}
+.word-block:hover {
+  transform: translateY(-2px);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+.sortable-ghost {
+  opacity: 0.5;
 }
-button:hover {
-  border-color: #646cff;
+.sortable-swap-highlight {
+  outline: 2px dashed #888;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+
+
 
 @media (prefers-color-scheme: light) {
   :root {

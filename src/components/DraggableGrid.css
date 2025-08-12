@@ -175,8 +175,8 @@
   @media (max-width: 480px) {
 
     .section--one   { max-width: 95vw; }
-    .section--two   { max-width: 98vw; }
-    .section--three { max-width: 60vw; }
+    .section--two   { max-width: 90vw; }
+    .section--three { max-width: 40vw; }
 
   
   }

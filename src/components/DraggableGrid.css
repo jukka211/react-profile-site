@@ -140,8 +140,8 @@
   
   /* sizes */
   .draggable-grid__item.size-small  { font-size: clamp(1rem, 3vw, 2rem); }
-  .draggable-grid__item.size-medium { font-size: clamp(1.9rem, 5vw, 3.5rem); }
-  .draggable-grid__item.size-large  { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+  .draggable-grid__item.size-medium { font-size: clamp(1.5rem, 5vw, 3rem); }
+  .draggable-grid__item.size-large  { font-size: clamp(2.3rem, 6vw, 4rem); }
   
   /* padding boost */
   .draggable-grid__item.pad { padding: 0px 0px; }

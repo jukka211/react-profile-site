@@ -175,7 +175,7 @@
   @media (max-width: 480px) {
 
     .section--one   { max-width: 95vw; }
-    .section--two   { max-width: 95vw; }
+    .section--two   { max-width: 98vw; }
     .section--three { max-width: 60vw; }
 
   
@@ -186,7 +186,7 @@
 
   .draggable-grid__item {
     min-width: 2ch; 
-    max-width: 60vw;
+    max-width: 80vw;
   }
 
   h1 {

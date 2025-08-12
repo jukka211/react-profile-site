@@ -1,98 +1,197 @@
-.draggable-grid__item {
+/* =========================================
+   GRID ITEM (pill)
+   ========================================= */
+   .draggable-grid__item {
     display: inline-block;
+  
+    /* let width vary with text, but keep pleasant min/max */
+    min-width: 4ch;                                /* don’t get too tiny */
+    max-width: clamp(16ch, 40vw, 28ch);            /* cap length; scales on viewport */
+  
+    /* allow wrapping and break long words */
+    /* or: word-break: break-word; */
+  
+    text-wrap: balance;
     text-align: center;
-    padding: 0px 0px;
-    border-radius: 29px;
+    border-radius: 56px;
     user-select: none;
-    cursor: move;
+    cursor: grab;
     font-size: clamp(3rem, 5vw, 3.5rem);
     line-height: 110%;
     background: transparent;
-    padding: 8px 16px;
+    padding: 16px 16px;
+    transition: all 0.3s ease;
 
   }
-  
-  /* your title responsive too */
+  .section--two    .draggable-grid__item {
+    border-radius: 12px;
+  }
+
+  /* =========================================
+     TITLE (element)
+     ========================================= */
   h1 {
     width: 100%;
     margin: 0;
-    padding-top: 06rem;
+    padding-top: 1rem;
     box-sizing: border-box;
     text-align: center;
-  
+   user-select: none;
     /* fluid title: min 3rem, ideal 10vw, max 12rem */
-    font-size: clamp(1.5rem, 15vw, 20rem);
+    font-size: clamp(1.1rem, 15vw, 20rem);
   
     font-weight: 200;
-    line-height: 0.9;
+    line-height: 90%;
     overflow-wrap: break-word;
   }
   
+  /* =========================================
+     GENERIC STATES / TITLES
+     ========================================= */
+  .app-loading {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .app-title {
+    white-space: pre-line;
+    width: 100%;
+    text-align: center;
+    font-weight: 200;
+    box-sizing: border-box;
+  }
+  
+  /* =========================================
+     CONTAINERS
+     ========================================= */
+  .app-container {
+    width: 100vw;
+    margin: 0 0;
+    padding: 0;
 
-/* Loading state */
-.app-loading {
-  text-align: center;
-  margin-top: 40px;
-}
-
-/* Main title */
-.app-title {
-  white-space: pre-line;
-  width: 100%;
-  text-align: center;
-  font-weight: 200;
-  box-sizing: border-box;
-}
-
-/* Main content container */
-.app-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0;
-}
-
-
-
-.draggable-grid__item:hover {
-  transform: translateX(-2px);
-}
-
-/* Expandable content */
-.draggable-grid__expandable {
-  position: relative;
-  top: 100%;
-
-  z-index: 10;
-
+  }
+  
+  /* Center the grid inside each section */
+  .section {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* Per-section widths (vw as requested) */
+  .section--one   { max-width: 35vw; }
+  .section--two   { max-width: 65vw; }
+  .section--three { max-width: 15vw; }
+  
+  /* =========================================
+     ICON INSIDE PILL
+     ========================================= */
+  .draggable-grid__icon {
+    height: 6em;          /* scales with text size */
+    width: auto;
+    border-radius: 56px;
+    padding: 0;
+    background-color: transparent;
+    vertical-align: middle;
+    display: inline-block;
+    border: 0;
+  }
+  
+  /* =========================================
+     INTERACTIONS
+     ========================================= */
+  .draggable-grid__item:hover {
+    transform: translateX(-2px);
+  }
+  
+  /* =========================================
+     EXPANDABLE CONTENT
+     ========================================= */
+  /* Sibling detail pill used in section "one" */
+  
+.detail-pill {
   display: none;
   opacity: 0;
   visibility: hidden;
-
-  transition: all 0.3s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  cursor: default;           /* optional: not draggable feel */
 }
 
-.draggable-grid__expandable.visible {
-  display: block;
+
+.detail-pill.visible {
+  display: flex;
+  flex-direction: column;
   opacity: 1;
-
   visibility: visible;
-  transform: translateY(0);
 }
 
-.draggable-grid__expandable img {
-  max-width: 100%;
- object-fit: contain;
-  border-radius: 8px;
-}
 
-.draggable-grid__expandable p {
-  display: block;
+.detail-pill__text {
   margin: 0;
-  color: #333;
-  line-height: 1.4;
+  line-height: 1.3;
+  font-size: clamp(1rem, 3vw, 2rem);
+  line-height: 105%;
+  overflow-wrap: break-word;
 }
 
-/* Per-item sizes (used only where we add the class in JSX) */
-.draggable-grid__item.size-small  { font-size: clamp(2rem, 4vw, 2.5rem); }
-.draggable-grid__item.size-medium { font-size: clamp(3rem, 5vw, 3.5rem); }
-.draggable-grid__item.size-large  { font-size: clamp(4rem, 6vw, 4.5rem); }
+  /* =========================================
+     CLASS TOKENS FROM CMS (only these)
+     ========================================= */
+  
+  /* sizes */
+  .draggable-grid__item.size-small  { font-size: clamp(1rem, 3vw, 2rem); }
+  .draggable-grid__item.size-medium { font-size: clamp(1.9rem, 5vw, 3.5rem); }
+  .draggable-grid__item.size-large  { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+  
+  /* padding boost */
+  .draggable-grid__item.pad { padding: 0px 0px; }
+  
+  /* kill any border (overrides inline) */
+  .draggable-grid__item.no-border { border: none !important; }
+  
+  /* outlined look (overrides inline) */
+  .draggable-grid__item.outline {
+    border: 0.75px solid currentColor !important;
+  }
+  
+  @keyframes emoji-pop-up {
+    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+    50%  { transform: translate(-50%, -120%) scale(1.5); opacity: 1; }
+    100% { transform: translate(-50%, -180%) scale(0.5); opacity: 0; }
+  }
+  
+  .emoji-pop {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    will-change: transform, opacity;
+    animation: emoji-pop-up var(--emoji-pop-duration, 800ms) ease-out forwards;
+  }
+  
+
+  @media (max-width: 480px) {
+
+    .section--one   { max-width: 95vw; }
+    .section--two   { max-width: 95vw; }
+    .section--three { max-width: 60vw; }
+
+  
+  }
+
+  /* very small phones (optional) */
+@media (max-width: 480px) {
+
+  .draggable-grid__item {
+    min-width: 2ch; 
+    max-width: 60vw;
+  }
+
+  h1 {
+    font-size: min(22vw, 4rem);   /* ~22% of screen width, max 4.2rem */
+    text-wrap: balance;
+  }
+
+}

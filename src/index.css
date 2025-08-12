@@ -11,70 +11,28 @@
   font-style: normal;
   font-display: swap;
 }
+/* 2. Apply it globally (optional) */
+body {
+  font-family: 'TimesDot';
 
-.page-title {
-  /* allow newline characters in the text to turn into real line breaks */
-  white-space: pre-line;
-
-  /* your existing styles */
-  width: 100%;
-  text-align: center;
-
-  font-weight: 200;
+}
+/* Global reset */
+html, body, #root {
   margin: 0;
-  padding: 1rem 0;
+  padding: 0;
+  width: 100%;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 
-/* 2. Apply it globally (optional) */
-body {
-  font-family: 'TimesDot';
-  line-height: 1.5;
-}
-.word-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0;
-  font-size: 56px;
-}
-
-.word-block {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-font-size: 56px;
-  user-select: none;
-  cursor: grab;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease;
-  color: #111;               /* ensure text is visible */
-  text-decoration: none;     /* reset link styles */
-}
-.word-block:hover {
-  transform: translateY(-2px);
-}
-
 .sortable-ghost {
   opacity: 0.5;
 }
-.sortable-swap-highlight {
-  outline: 2px dashed #888;
-}
 
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+

@@ -1,37 +1,35 @@
 // src/components/DraggableGrid.tsx
-import React, { useEffect, useRef, ReactElement } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Sortable from 'sortablejs';
-import './DraggableGrid.css';  // ← make sure this line is here
+import './DraggableGrid.css';
 
-type DraggableGridProps = {
-  children: React.ReactNode[];
-};
+type Props = { items: React.ReactNode[] };
 
 export const DraggableGrid: React.FC<Props> = ({ items }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
-    const s = Sortable.create(ref.current, { animation: 150 });
+    const s = Sortable.create(ref.current, { animation: 200 });
     return () => s.destroy();
   }, []);
 
   return (
-<div 
-   className="draggable-grid__item"
-  ref={ref}
-  style={{
-
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'center',  // ← add this
-    alignItems: 'center',      // ← optional, for vertical centering
-    gap: '0px',
-    margin: '0px 0'
-  }}
->
-  {items}
-</div>
-
+    <div
+      className="draggable-grid"   // 👈 container class (NOT __item)
+      ref={ref}
+      style={{
+        width: '100%',
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',   // try 'space-between' if you want full row spread
+        alignItems: 'flex-start',
+        gap: '0',
+        margin: '0',
+        padding: '0',
+      }}
+    >
+      {items}
+    </div>
   );
 };

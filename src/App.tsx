@@ -10,18 +10,12 @@ type BlockData = {
   text: string;
   url?: string;
   bgColor: string;
-
-  // optional extras
   expandedText?: string;
   expandedImage?: string;
-
-  // small icon inside the pill
   imageUrl?: string;
   imageAlt?: string;
-
-  // presentation
-  classes?: string[];   // CMS tokens: pad, no-border, outline, size-*
-  order?: number;       // manual ordering number (lower = earlier)
+  classes?: string[];
+  order?: number;
 };
 
 type NameEntry = { title: string };
@@ -94,13 +88,11 @@ export default function App() {
 
   if (loading) return <div className="app-loading">Loading…</div>;
 
-  // group by section
   const bySection = blocks.reduce<Record<string, BlockData[]>>((acc, b) => {
     (acc[b.section] = acc[b.section] || []).push(b);
     return acc;
   }, {});
 
-  // sort inside each section by "order" then by "text"
   Object.values(bySection).forEach((arr) => {
     arr.sort(
       (a, b) =>
@@ -117,7 +109,6 @@ export default function App() {
     });
   };
 
-  // allow ONLY these class tokens from CMS
   const ALLOWED = new Set([
     'pad',
     'no-border',
@@ -127,7 +118,6 @@ export default function App() {
     'size-large',
   ]);
 
-  // Convert BlockData[] → JSX[]
   const makeItems = (arr: BlockData[], defaultBorder?: string): React.ReactNode[] =>
     arr.flatMap((b, i) => {
       const id = `${b.section}-${i}`;
@@ -147,55 +137,65 @@ export default function App() {
         !hasOutline &&
         Boolean(defaultBorder);
 
-      // ---------- NEW: section "one" renders a sibling detail pill ----------
-      if (b.section === 'one') {
-        const mainPill = (
-          <span
-            key={`${id}-main`}
-            className={`draggable-grid__item ${cmsClasses}`.trim()}
-            style={{
-              backgroundColor: b.bgColor,
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (hasExpanded) toggleItem(id);
-            }}
-          >
-            {b.imageUrl && (
-              <img
-                src={b.imageUrl}
-                alt={b.imageAlt || b.text}
-                className="draggable-grid__icon"
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-            {b.text}
-          </span>
-        );
+      // SECTION "one": pill + detail in one draggable item (adds close button when open)
+  // SECTION "one": pill + detail in one draggable item
+if (b.section === 'one') {
+  return [
+    <span
+      key={`${id}-wrapper`}
+      className={`draggable-grid__item pill-with-detail ${cmsClasses}`.trim()}
+      style={{ ['--pill-bg' as any]: b.bgColor }}     // << pass color via CSS var
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (hasExpanded) toggleItem(id);
+      }}
+    >
+      {/* Close button (only when expanded) */}
+      {isExpanded && hasExpanded && (
+        <button
+          type="button"
+          className="pill-close"
+          aria-label="Close details"
+          title="Close"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleItem(id);
+          }}
+        ><span>Close</span>
+        </button>
+      )}
 
-        const detailPill = hasExpanded ? (
-          <span
-            key={`${id}-detail`}
-            className={`draggable-grid__item detail-pill ${isExpanded ? 'visible' : ''}`}
-            style={{
-              backgroundColor: b.bgColor,
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {b.expandedImage && (
-              <img src={b.expandedImage} alt="" className="detail-pill__img" />
-            )}
-            {b.expandedText && <p className="detail-pill__text">{b.expandedText}</p>}
-          </span>
-        ) : null;
+      {/* Main pill */}
+      {b.imageUrl && (
+        <img
+          src={b.imageUrl}
+          alt={b.imageAlt || b.text}
+          className="draggable-grid__icon"
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
+      {b.text}
 
-        // return both pills as siblings so they appear "next to" each other
-        return detailPill ? [mainPill, detailPill] : [mainPill];
-      }
-      // ---------- END section "one" special rendering ----------
+      {/* Inline expandable: keep transparent so it doesn't paint a rectangle */}
+      {hasExpanded && (
+        <div
+          className={`detail-pill ${isExpanded ? 'visible' : ''}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {b.expandedImage && (
+            <img src={b.expandedImage} alt="" className="detail-pill__img" />
+          )}
+          {b.expandedText && <p className="detail-pill__text">{b.expandedText}</p>}
+        </div>
+      )}
+    </span>,
+  ];
+}
 
-      // Default rendering for sections "two" and "three"
+
+      // Other sections
       return [
         <span
           key={id}
@@ -233,22 +233,48 @@ export default function App() {
       ];
     });
 
+  const LIMITS = {
+    one: 3,
+    loose: 10,
+    two: 7,
+  };
+
+  const sectionOneItems = makeItems((bySection.one   || []).slice(0, LIMITS.one));
+  const looseBlockItems = makeItems((bySection.loose || []).slice(0, LIMITS.loose));
+  const sectionTwoItems = makeItems((bySection.two   || []).slice(0, LIMITS.two));
+
+  const wrapAsBoardItems = (nodes: React.ReactNode[], keyPrefix: string) =>
+    nodes.map((n, i) => (
+      <div className="board-item" key={`${keyPrefix}-${i}`}>
+        {n}
+      </div>
+    ));
+
+  const outerItems: React.ReactNode[] = [
+    <div className="board-item" key="section-1">
+      <div className="section section--one">
+        <DraggableGrid items={sectionOneItems} />
+      </div>
+    </div>,
+    ...wrapAsBoardItems(looseBlockItems, 'loose'),
+    <div className="board-item" key="section-2">
+      <div className="section section--two-inner">
+        <DraggableGrid items={sectionTwoItems} />
+      </div>
+    </div>,
+  ];
+
   return (
     <div>
       <EmojiPopper selector="body" size="5rem" durationMs={800} />
       <h1 className="app-title">{title}</h1>
 
       <div className="app-container">
-        <div className="section section--one">
-          <DraggableGrid items={makeItems(bySection.one || [])} />
-        </div>
-
-        <div className="section section--two">
-          <DraggableGrid items={makeItems(bySection.two || [])} />
-        </div>
-
-        <div className="section section--three">
-          <DraggableGrid items={makeItems(bySection.three || [])} />
+        <div className="section section--board">
+          <DraggableGrid
+            items={outerItems}
+            draggableSelector=".board-item"
+          />
         </div>
       </div>
     </div>

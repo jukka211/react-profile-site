@@ -24,7 +24,7 @@ export const DraggableGrid: React.FC<Props> = ({ items }) => {
         flexWrap: 'wrap',
         justifyContent: 'center',   // try 'space-between' if you want full row spread
         alignItems: 'flex-start',
-        gap: '0',
+        gap: '6px',
         margin: '0',
         padding: '0',
       }}

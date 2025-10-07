@@ -33,6 +33,36 @@ html, body, #root {
 .sortable-ghost {
   opacity: 0.5;
 }
+.reload-btn {
+  font-family: 'TimesDot';
+  z-index: 99999;
+  all: unset;
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 0.3rem 0.6rem;
+  color: white;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.8);
+  transition: background 0.2s ease;
+}
 
+.reload-btn:hover {
+  background:#3AEA00;
+}
 
+.top-nav {
+  position: fixed;
 
+  display: flex;
+  gap: 0.75rem;
+  z-index: 99999;
+  background: transparent;
+  bottom:10px;
+  right: 50%;
+
+}
+.top-nav a {
+  text-decoration: none;
+
+}

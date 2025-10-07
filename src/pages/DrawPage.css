@@ -1,0 +1,45 @@
+/* src/pages/DrawPage.css */
+
+
+  
+  .draw-page {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+  }
+  
+  .draw-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100svh;
+    background: transparent;
+    z-index: 999;
+  }
+  
+  .draw-title {
+    position: fixed;
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 2;
+    text-align: center;
+    pointer-events: none;
+    padding-top: 9vh;
+  }
+  
+ 
+  
+  
+
+  .draggable-grid__item:hover {z-index: 999;}
+  
+  @media (hover: none) {
+    .draw-canvas { cursor: default; }
+  }
+  
+
+  @media (max-width: 600px) {
+    .draw-title {padding-top: 0vh;}
+  }

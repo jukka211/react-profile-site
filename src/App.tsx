@@ -302,7 +302,7 @@ const titleItem = (
       <div className="title-wrapper">
       
         <h1 className="app-title">{title}</h1>
-        <img src="/src/assets/Sabine_Logo Shirt.jpeg" alt="Decorative title" className="title-hover-img"/>
+        <img src="/assets/Sabine_Logo Shirt.jpeg" alt="Decorative title" className="title-hover-img" />
       </div>
     </div>
   </div>

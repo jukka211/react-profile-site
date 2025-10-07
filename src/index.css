@@ -52,14 +52,14 @@ html, body, #root {
 }
 
 .top-nav {
-  position: fixed;
-
   display: flex;
   gap: 0.75rem;
   z-index: 99999;
   background: transparent;
-  bottom:10px;
-  right: 50%;
+  position: fixed;
+  bottom: 2rem;       /* distance from bottom */
+  left: 50%;          /* start at horizontal center */
+  transform: translateX(-50%); /* shift left by half its width */
 
 }
 .top-nav a {

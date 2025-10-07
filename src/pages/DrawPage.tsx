@@ -5,9 +5,9 @@ import "../components/DraggableGrid.css"; // pill + outline styles
 import "./DrawPage.css";                  // fullscreen draw layout
 
 // ---------------- CONFIG ----------------
-const SPAWN_THROTTLE = 200;   // ms between spawns
+const SPAWN_THROTTLE = 150;   // ms between spawns
 const BURST_COUNT = 1;       // how many per spawn event
-const JITTER_RANGE = 500;     // pixel spread
+const JITTER_RANGE = 250;     // pixel spread
 const LIFETIME_MS = 10000;    // ms before pills fade/cleanup
 
 const ALLOWED = new Set([

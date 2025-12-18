@@ -6,6 +6,25 @@
   font-display: swap;
 }
 
+/* Proportional font scaling */
+:root {
+  --scale: 1; /* desktop */
+}
+
+@media (max-width: 768px) {
+  :root {
+    --scale: 0.78; /* tablet */
+  }
+  
+}
+
+@media (max-width: 480px) {
+  :root {
+    --scale: 0.55; /* mobile */
+  }
+
+}
+
 /* Global selection style */
 ::selection {
   background: lime;
@@ -21,7 +40,7 @@
   padding: 0;
   margin: 0;
   line-height: 1.1;
-  font-size: 3.5rem;
+  font-size: calc(3.5rem * var(--scale));
   text-align: center;
   font-family: "TimesDot";
 }
@@ -32,7 +51,7 @@
 }
 
 .title {
-  font-size: 7rem;
+  font-size: calc(7rem * var(--scale));
   line-height: 1.1;
 }
 
@@ -44,7 +63,7 @@
   cursor: pointer;
   text-decoration: underline;
   text-decoration-thickness: 6px;
-  font-size: 5rem;
+  font-size: calc(7rem * var(--scale));
   font-weight: normal;
   text-underline-offset: 6px;
   transition: letter-spacing 0.3s ease-in-out;
@@ -78,7 +97,7 @@
   background-color: yellow;
   border-radius: 2rem;
   padding: 0.2em 0.6em;
-  font-size: 2rem;
+  font-size: calc(2rem * var(--scale));
   font-weight: normal;
   display: inline-block;
   margin: 0;
@@ -91,7 +110,7 @@
 }
 
 .cta-insta {
-  font-size: 4rem;
+  font-size: calc(5rem * var(--scale));
   border-radius: 5rem;
   padding: 0em 0.2em;
 }
@@ -113,7 +132,7 @@
 }
 
 .first-line {
-  font-size: 5rem;
+  font-size: calc(5rem * var(--scale));
 }
 
 /* Ticker */
@@ -132,7 +151,7 @@
   display: inline-block;
   padding-top: 10px;
   color: #ff0000;
-  font-size: 7rem;
+  font-size: calc(7rem * var(--scale));
   line-height: 1.1;
   cursor: pointer;
   text-decoration: underline;
@@ -150,5 +169,10 @@
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+@media (max-width: 480px) {
+  .text-block {
+    padding: 0 12px;
   }
 }

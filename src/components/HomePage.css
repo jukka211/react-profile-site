@@ -1,0 +1,376 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+.draw-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.draw-page {
+  margin: 0;
+  padding: 0;
+}
+
+
+.draw-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.audio-footer-line {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  pointer-events: none;
+}
+
+.screen-nav-button {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  z-index: 9998;
+  cursor: pointer;
+}
+
+/* ✅ keep ONLY one emoji-pop definition */
+.emoji-pop {
+  font-size: 6.5rem;
+  user-select: none;
+  pointer-events: none;
+}
+
+
+   .draggable-grid {
+    width: 30%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;   /* try 'space-between' if you want full row spread */
+    align-items: flex-start;
+    gap: 0;
+    margin: 0 auto;  
+    padding: 0;
+  }
+
+
+   .draggable-grid__item {
+    display: inline-block;
+    min-width: 4ch;
+    max-width: clamp(28ch, 40vw, 28ch);
+    text-wrap: balance;
+    text-align: center;
+    border-radius: 64px;
+    user-select: none;
+    font-size: clamp(1rem, calc(0.5rem + 2vw), 2rem);
+    line-height: 110%;
+    background: transparent;
+    padding: 18px 28px;
+    transition: all 0.3s ease;
+    border: none !important;
+    outline: none !important;
+  }
+
+  /* =========================================
+   INFO SECTION (centered, 1 column, centered text)
+   ========================================= */
+.info-section {
+    width: 30%;
+    margin: 2rem auto 15rem;   /* centers the section */
+    display: grid;
+    grid-template-columns: 1fr; /* one column */
+    gap: 4rem;
+    text-align: center;    /* center text inside */
+  }
+  
+  .info-card {
+    background: transparent; /* or #f7f7f7 if you want a card look */
+    border-radius: 24px;
+    padding: 0; 
+    text-align: center;     
+       
+  }
+  .info-body {
+    text-align: center;  
+    width: 46%;
+    margin: 0 auto;  
+    font-size: 1.4em;        /* requested size */
+    line-height: 1.15;
+  }
+  .info-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 3.5em;        /* requested size */
+    line-height: 1.05;
+    font-weight: 400;
+  }
+  
+ 
+  
+  /* optional: make it readable on small screens */
+  @media (max-width: 900px) {
+    .info-section { width: 90%; }
+  }
+
+  
+  .draggable-grid__item[style*="background-color: rgb(0, 0, 0)"] { color:#fff; }
+  /* =========================================
+     TITLE (element)
+     ========================================= */
+  h1 {
+    width: 100%;
+    margin: 0;
+    padding-top: 3rem;
+    padding-bottom: 0rem;
+    box-sizing: border-box;
+    text-align: center;
+   user-select: none;
+    /* fluid title: min 3rem, ideal 10vw, max 12rem */
+    font-size: clamp(1.1rem, 25vw, 20rem);
+  
+    font-weight: 200;
+    line-height: 80%;
+    overflow-wrap: break-word;
+  }
+
+
+
+
+
+
+
+  
+  /* =========================================
+     GENERIC STATES / TITLES
+     ========================================= */
+  .app-loading {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .app-title {
+    white-space: pre-line;
+    width: 100%;
+    text-align: center;
+    font-weight: 200;
+    box-sizing: border-box;
+  }
+  
+  /* =========================================
+     CONTAINERS
+     ========================================= */
+  .app-container {
+
+    width: 100vw;
+    margin:  0;
+    padding: 0;
+    padding-top: 9vh;
+
+  }
+
+
+.section--two-inner {
+  margin: 0 auto;    /* 👈 center the inner section inside its board-item */
+  display: flex;
+  justify-content: center;
+}
+
+
+
+.section--two-inner {
+  max-width: 30vw;
+}
+/* Your existing .draggable-grid__item etc. remain the same */
+
+  
+  /* =========================================
+     ICON INSIDE PILL
+     ========================================= */
+  .draggable-grid__icon {
+    height: 6em;          /* scales with text size */
+    width: auto;
+    border-radius: 56px;
+    padding: 0;
+    background-color: transparent;
+    vertical-align: middle;
+    display: inline-block;
+    border: none;
+  }
+  
+  /* =========================================
+     INTERACTIONS
+     ========================================= */
+  .draggable-grid__item:hover {
+    transform: translateX(-5px);
+  }
+
+
+
+
+
+
+
+  /* =========================================
+     CLASS TOKENS FROM CMS (only these)
+     ========================================= */
+     .draggable-grid__item.size-small  { font-size: 1.4em; }  /* 85% of base */
+     .draggable-grid__item.size-medium { font-size: 2.3em; }     /* 100% of base */
+     .draggable-grid__item.size-large  { font-size: 3.5em; }   /* 150% of base */
+  
+  /* padding boost */
+  .draggable-grid__item.pad { padding: 0px 0px; }
+  
+  /* kill any border (overrides inline) */
+  .draggable-grid__item.no-border { border: none !important; }
+  
+
+  @keyframes emoji-pop-up {
+    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+    50%  { transform: translate(-50%, -120%) scale(1.5); opacity: 1; }
+    100% { transform: translate(-50%, -180%) scale(0.5); opacity: 0; }
+  }
+  
+
+  
+  .draggable-grid__item {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex; /* or whatever you used before */
+  }
+
+  
+
+
+  /* very small phones (optional) */
+@media (max-width: 680px) {
+
+  .draggable-grid__item.size-small  { font-size: 1.1em; }  /* 85% of base */
+  .draggable-grid__item.size-medium { font-size: 1.5em; }     /* 100% of base */
+  .draggable-grid__item.size-large  { font-size: 2em; }   /* 150% of base */
+
+  .section--board {
+    max-width: 90vw;
+    margin: 0 auto;           /* 👈 center the board horizontally */
+    display: flex;
+    justify-content: center;  
+    gap: 0px; /* 👈 center contents inside */
+  }
+  
+  .section--one,
+  .section--two-inner {
+    max-width: 90vw;   /* or whatever fits */
+    margin: 0 auto;    /* 👈 center the inner section inside its board-item */
+    display: flex;
+    justify-content: center;
+  }
+  h1 {
+    font-size: min(22vw, 4rem);   /* ~22% of screen width, max 4.2rem */
+    text-wrap: balance;
+    padding-top: 2rem;
+    padding-bottom: 0.5rem;
+  }
+  .detail-pill__text {
+
+    max-width: 100vw;
+  
+  }
+
+  .draggable-grid__item {
+    border-radius: 48px;
+    padding: 14px 24px;
+  }
+
+}
+
+
+/* Defaults (desktop/laptop) */
+:root {
+  --pill-max-ch: 36ch;     /* max line length */
+  --pill-pad-x: 28px;
+  --pill-pad-y: 18px;
+  --board-gap: 100px;
+}
+
+@media (min-width: 768px) and (max-width: 1920px) {
+  .section--one {
+    max-width: 26vw;
+  }
+  
+  .section--two-inner {
+    max-width: 36vw;
+  }
+
+  .section--board {
+    max-width: 70vw;
+  }
+}
+
+
+
+/* Large tablets / small laptops */
+@media (max-width: 1200px) {
+  :root { --pill-max-ch: 40ch; --board-gap: 72px; }
+}
+
+/* Tablets (e.g. iPad landscape & portrait) */
+@media (max-width: 900px) {
+  :root { --pill-max-ch: 32ch; --pill-pad-x: 24px; --board-gap: 48px; }
+}
+
+/* Large phones / small tablets */
+@media (max-width: 768px) {
+  :root { --pill-max-ch: 30ch; --pill-pad-x: 22px; --board-gap: 32px; }
+}
+
+/* Phones */
+@media (max-width: 600px) {
+  :root { --pill-max-ch: 28ch; --pill-pad-x: 20px; --board-gap: 16px; }
+  .app-container {padding-top: 0vh;}
+  .emoji-pop {
+    font-size: 3rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  :root { --pill-max-ch: 26ch; --pill-pad-x: 16px; --board-gap: 12px; 
+  }
+}
+
+
+
+
+
+/* Optional: scale icon a bit on smaller screens */
+@media (max-width: 600px) {
+  .draggable-grid__icon { height: 4.5em; }
+}
+@media (max-width: 400px) {
+  .draggable-grid__icon { height: 3.8em; }
+}
+
+/* Optional: soften size multipliers on small screens */
+@media (max-width: 1400px) {
+  .draggable-grid__item.size-small  { font-size: 1.2em; }
+  .draggable-grid__item.size-medium { font-size: 1.6em; }
+  .draggable-grid__item.size-large  { font-size: 2.6em; }
+}
+@media (max-width: 880px) {
+  .draggable-grid__item.size-small  { font-size: 1.1em; }
+  .draggable-grid__item.size-medium { font-size: 1.4em; }
+  .draggable-grid__item.size-large  { font-size: 1.8em; }
+}

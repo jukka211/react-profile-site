@@ -1,0 +1,432 @@
+
+/* =========================================
+   GRID ITEM (pill)
+   ========================================= */
+   .draggable-grid__item {
+    display: inline-block;
+    min-width: 4ch;
+    max-width: clamp(28ch, 40vw, 28ch);
+    text-wrap: balance;
+    text-align: center;
+    border-radius: 64px;
+    user-select: none;
+    font-size: clamp(1rem, calc(0.5rem + 2vw), 2rem);
+    line-height: 110%;
+    background: transparent;
+    padding: 18px 28px;
+    transition: all 0.3s ease;
+    border: none !important;
+    outline: none !important;
+  }
+
+  .draggable-grid__item[style*="background-color: rgb(0, 0, 0)"] { color:#fff; }
+  /* =========================================
+     TITLE (element)
+     ========================================= */
+  h1 {
+    width: 100%;
+    margin: 0;
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+    box-sizing: border-box;
+    text-align: center;
+   user-select: none;
+    /* fluid title: min 3rem, ideal 10vw, max 12rem */
+    font-size: clamp(1.1rem, 7vw, 16rem);
+  
+    font-weight: 200;
+    line-height: 80%;
+    overflow-wrap: break-word;
+  }
+
+/* Make the TITLE board item span the full viewport width (bleed out of the board) */
+.section--board .board-item--full {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  flex: 0 0 100vw !important;         /* for flex-based DraggableGrid */
+  grid-column: 1 / -1 !important;     /* for grid-based DraggableGrid */
+  margin-left: calc(50% - 50vw) !important;  /* center the bleed */
+  margin-right: calc(50% - 50vw) !important;
+}
+
+/* Remove the “pill” constraints for the title tile specifically */
+.section--board .board-item--full .draggable-grid__item.title-item {
+  max-width: none !important;   /* kill 28ch cap */
+  min-width: 0;                 /* allow shrinking if needed */
+  width: 100% !important;
+  display: block;               /* not inline-* */
+  border-radius: 0;             /* no rounded pill edge */
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* The H1 itself should just fill the row */
+.section--board .board-item--full .app-title {
+  width: 100%;
+  margin: 0;
+}
+
+.draggable-grid__item.has-hover-img {
+  display: inline-flex;        /* you already use inline-flex globally */
+  flex-direction: column;      /* ← stack vertically */
+  align-items: center;         /* center the image/text */
+  text-align: center;
+}
+
+/* Hidden by default but stays in normal flow */
+.loose-hover-img {
+  width: auto;
+  max-width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  border-radius: 40px;
+
+}
+
+/* Reveal on hover (mouse) or focus-within (keyboard) */
+.draggable-grid__item.has-hover-img:hover .loose-hover-img,
+.draggable-grid__item.has-hover-img:focus-within .loose-hover-img {
+  max-height: 25vh;       /* tweak as you like */
+}
+
+
+
+
+  
+  /* =========================================
+     GENERIC STATES / TITLES
+     ========================================= */
+  .app-loading {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .app-title {
+    white-space: pre-line;
+    width: 100%;
+    text-align: center;
+    font-weight: 200;
+    box-sizing: border-box;
+  }
+  
+  /* =========================================
+     CONTAINERS
+     ========================================= */
+  .app-container {
+
+    width: 100vw;
+    margin:  0;
+    padding: 0;
+    padding-top: 9vh;
+
+  }
+  
+  /* The outer board’s draggable unit */
+  .board-item {
+    display: flex;             /* already flex */
+    flex-direction: column;
+    align-items: center;       /* 👈 horizontal centering */
+    justify-content: center;   /* 👈 vertical centering if needed */
+    text-align: center;        /* 👈 center text inside pills */
+  }
+  
+
+/* Optional widths so inner sections look good as cards inside the board */
+.section--board {
+  max-width: 60vw;
+  margin: 0 auto;           /* 👈 center the board horizontally */
+  display: flex;
+  justify-content: center;  
+  gap: 100px; /* 👈 center contents inside */
+}
+
+.section--one,
+.section--two-inner {
+  margin: 0 auto;    /* 👈 center the inner section inside its board-item */
+  display: flex;
+  justify-content: center;
+}
+
+.section--one {
+  max-width: 20vw;
+}
+
+.section--two-inner {
+  max-width: 30vw;
+}
+/* Your existing .draggable-grid__item etc. remain the same */
+
+  
+  /* =========================================
+     ICON INSIDE PILL
+     ========================================= */
+  .draggable-grid__icon {
+    height: 6em;          /* scales with text size */
+    width: auto;
+    border-radius: 56px;
+    padding: 0;
+    background-color: transparent;
+    vertical-align: middle;
+    display: inline-block;
+    border: none;
+  }
+  
+  /* =========================================
+     INTERACTIONS
+     ========================================= */
+  .draggable-grid__item:hover {
+    transform: translateX(-5px);
+  }
+  
+  /* =========================================
+     EXPANDABLE CONTENT
+     ========================================= */
+  /* Sibling detail pill used in section "one" */
+  
+
+
+/* Reuse your existing styles but make it overlay/attach to the pill */
+/* Inline, in-flow expandable panel */
+.detail-pill {
+  display: none;             /* stay in flow */
+  max-height: 0;              /* collapsed */
+  overflow: hidden;           /* hide while collapsed */
+  opacity: 0;
+  visibility: hidden;
+  margin-top: 0;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.25s ease,
+    visibility 0.25s ease,
+    margin-top 0.25s ease;
+  padding: 0;
+
+
+}
+
+.detail-pill.visible {
+  border-radius: 0;
+  display: block;  
+  max-height: 20vh;         /* big enough to fit your largest content */
+  opacity: 1;
+  visibility: visible;
+}
+
+.detail-pill__text {
+  margin: 0;
+  font-size: clamp(1rem, 0.9vw, 2rem); 
+  line-height: 105%;
+  overflow-wrap: break-word;
+  max-width: 36vw;
+
+}
+
+/* Ensure the wrapper is a positioning context for the close button */
+.pill-with-detail {
+  position: relative;         /* anchor for absolute close button */
+}
+
+/* Hover/active feedback (optional) */
+.pill-close:hover   { background: #f5f5f5; }
+.pill-close:active  { transform: translateY(1px); }
+
+/* Wrapper stays transparent but provides the color via --pill-bg */
+.pill-with-detail {
+  position: relative;           /* anchor for close button */
+  display: inline-flex;
+  flex-direction: column;
+  gap: .5rem;
+  background: transparent;
+  --pill-bg: #eee;              /* default/fallback */
+}
+
+/* The colored, rounded pill surface */
+.pill-face,
+.draggable-grid__item.pill-with-detail { /* if you're coloring the item itself */
+  background: var(--pill-bg);
+  border-radius: none;
+}
+
+/* Close button: uses the same color as the pill */
+.pill-close {
+  font-family: 'TimesDot';
+  font-size: 1rem;
+  position: absolute;
+  top: 0px; right: 0px;
+  width: 3rem; height: 3rem;
+  border-radius: 40px;
+  background: var(--pill-bg);                     /* << same as pill */
+  color: #111;                                    /* X color; tweak as needed */
+  border: none;
+  display: inline-flex; align-items: center; justify-content: center;
+
+}
+.pill-close:hover {   background: var(--pill-bg); transform: scale(1.4); transition: all 0.2s ease-in-out;}
+.pill-close:active { transform: translateY(1px); }
+
+/* Keep expanded detail transparent so it doesn't extend the background */
+.detail-pill { background: transparent !important; }
+
+
+
+  /* =========================================
+     CLASS TOKENS FROM CMS (only these)
+     ========================================= */
+     .draggable-grid__item.size-small  { font-size: 1.4em; }  /* 85% of base */
+     .draggable-grid__item.size-medium { font-size: 2.3em; }     /* 100% of base */
+     .draggable-grid__item.size-large  { font-size: 3.5em; }   /* 150% of base */
+  
+  /* padding boost */
+  .draggable-grid__item.pad { padding: 0px 0px; }
+  
+  /* kill any border (overrides inline) */
+  .draggable-grid__item.no-border { border: none !important; }
+  
+  /* outlined look (overrides inline) */
+  .draggable-grid__item.outline {
+    outline: none !important;               /* ← kill the extra black ring */
+    border: 1px solid #b9b9b9 !important;   /* ← keep only the red */
+  }
+  @keyframes emoji-pop-up {
+    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+    50%  { transform: translate(-50%, -120%) scale(1.5); opacity: 1; }
+    100% { transform: translate(-50%, -180%) scale(0.5); opacity: 0; }
+  }
+  
+  .emoji-pop {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    will-change: transform, opacity;
+    animation: emoji-pop-up var(--emoji-pop-duration, 800ms) ease-out forwards;
+  }
+  
+  .draggable-grid__item {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex; /* or whatever you used before */
+  }
+
+  
+
+
+  /* very small phones (optional) */
+@media (max-width: 680px) {
+
+  .draggable-grid__item.size-small  { font-size: 1.1em; }  /* 85% of base */
+  .draggable-grid__item.size-medium { font-size: 1.5em; }     /* 100% of base */
+  .draggable-grid__item.size-large  { font-size: 2em; }   /* 150% of base */
+
+  .section--board {
+    max-width: 90vw;
+    margin: 0 auto;           /* 👈 center the board horizontally */
+    display: flex;
+    justify-content: center;  
+    gap: 0px; /* 👈 center contents inside */
+  }
+  
+  .section--one,
+  .section--two-inner {
+    max-width: 90vw;   /* or whatever fits */
+    margin: 0 auto;    /* 👈 center the inner section inside its board-item */
+    display: flex;
+    justify-content: center;
+  }
+  h1 {
+    font-size: min(22vw, 4rem);   /* ~22% of screen width, max 4.2rem */
+    text-wrap: balance;
+    padding-top: 2rem;
+    padding-bottom: 0.5rem;
+  }
+  .detail-pill__text {
+
+    max-width: 100vw;
+  
+  }
+
+  .draggable-grid__item {
+    border-radius: 48px;
+    padding: 14px 24px;
+  }
+
+}
+
+
+/* Defaults (desktop/laptop) */
+:root {
+  --pill-max-ch: 36ch;     /* max line length */
+  --pill-pad-x: 28px;
+  --pill-pad-y: 18px;
+  --board-gap: 100px;
+}
+
+@media (min-width: 768px) and (max-width: 1920px) {
+  .section--one {
+    max-width: 26vw;
+  }
+  
+  .section--two-inner {
+    max-width: 36vw;
+  }
+
+  .section--board {
+    max-width: 70vw;
+  }
+}
+
+
+
+/* Large tablets / small laptops */
+@media (max-width: 1200px) {
+  :root { --pill-max-ch: 40ch; --board-gap: 72px; }
+}
+
+/* Tablets (e.g. iPad landscape & portrait) */
+@media (max-width: 900px) {
+  :root { --pill-max-ch: 32ch; --pill-pad-x: 24px; --board-gap: 48px; }
+}
+
+/* Large phones / small tablets */
+@media (max-width: 768px) {
+  :root { --pill-max-ch: 30ch; --pill-pad-x: 22px; --board-gap: 32px; }
+}
+
+/* Phones */
+@media (max-width: 600px) {
+  :root { --pill-max-ch: 28ch; --pill-pad-x: 20px; --board-gap: 16px; }
+  .app-container {padding-top: 0vh;}
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  :root { --pill-max-ch: 26ch; --pill-pad-x: 16px; --board-gap: 12px; }
+}
+
+
+
+
+
+/* Optional: scale icon a bit on smaller screens */
+@media (max-width: 600px) {
+  .draggable-grid__icon { height: 4.5em; }
+}
+@media (max-width: 400px) {
+  .draggable-grid__icon { height: 3.8em; }
+}
+
+/* Optional: soften size multipliers on small screens */
+@media (max-width: 1400px) {
+  .draggable-grid__item.size-small  { font-size: 1.2em; }
+  .draggable-grid__item.size-medium { font-size: 1.6em; }
+  .draggable-grid__item.size-large  { font-size: 2.6em; }
+}
+@media (max-width: 880px) {
+  .draggable-grid__item.size-small  { font-size: 1.1em; }
+  .draggable-grid__item.size-medium { font-size: 1.4em; }
+  .draggable-grid__item.size-large  { font-size: 1.8em; }
+}

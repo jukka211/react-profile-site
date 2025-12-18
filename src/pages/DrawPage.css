@@ -1,0 +1,154 @@
+@font-face {
+  font-family: "TimesDot";
+  src: url("TimesDotRom.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Global selection style */
+::selection {
+  background: lime;
+  color: black;
+}
+::-moz-selection {
+  background: lime;
+  color: black;
+}
+
+/* Page root */
+.drawpage-root {
+  padding: 0;
+  margin: 0;
+  line-height: 1.1;
+  font-size: 3.5rem;
+  text-align: center;
+  font-family: "TimesDot";
+}
+
+/* Content */
+.text-block {
+  padding: 0 13vw;
+}
+
+.title {
+  font-size: 7rem;
+  line-height: 1.1;
+}
+
+/* Newsletter Tel. eMail + Trainerprofil. */
+.cta-big-lime,
+.cta-big-blue,
+.cta-big-violet,
+.cta-big-brown {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 6px;
+  font-size: 5rem;
+  font-weight: normal;
+  text-underline-offset: 6px;
+  transition: letter-spacing 0.3s ease-in-out;
+}
+
+.cta-big-lime:hover,
+.cta-big-blue:hover,
+.cta-big-violet:hover,
+.cta-big-brown:hover {
+  color: #000;
+}
+
+.cta-big-lime {
+  color: lime;
+}
+.cta-big-blue {
+  color: #3b9dff;
+}
+.cta-big-violet {
+  color: #ff0000;
+}
+.cta-big-brown {
+  color: #ff6a00;
+}
+
+/* Instagram🤣FB */
+.cta-insta,
+.cta-fb,
+.cta-daten,
+.cta-linkedin {
+  background-color: yellow;
+  border-radius: 2rem;
+  padding: 0.2em 0.6em;
+  font-size: 2rem;
+  font-weight: normal;
+  display: inline-block;
+  margin: 0;
+  cursor: pointer;
+}
+
+.cta-daten {
+  background-color: rgb(205, 205, 205);
+  cursor: pointer;
+}
+
+.cta-insta {
+  font-size: 4rem;
+  border-radius: 5rem;
+  padding: 0em 0.2em;
+}
+
+.cta-fb {
+  background-color: orange;
+}
+
+.cta-linkedin {
+  background-color: lime;
+}
+
+.cta-insta:hover,
+.cta-fb:hover,
+.cta-daten:hover,
+.cta-linkedin:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.first-line {
+  font-size: 5rem;
+}
+
+/* Ticker */
+.ticker-wrapper {
+  overflow-x: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.ticker {
+  display: inline-block;
+  animation: ticker-move 20s linear infinite;
+}
+
+.ticker span {
+  display: inline-block;
+  padding-top: 10px;
+  color: #ff0000;
+  font-size: 7rem;
+  line-height: 1.1;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.ticker span:hover {
+  color: lime;
+}
+
+@keyframes ticker-move {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

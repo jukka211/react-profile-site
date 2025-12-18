@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+
+
+@font-face {
+  font-family: 'TimesDot';
+  src: url('TimesDotRom.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+/* 2. Apply it globally (optional) */
+body {
+  font-family: 'TimesDot';
+
+}
+/* Global reset */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+.sortable-ghost {
+  opacity: 0.5;
+}
+.reload-btn {
+  font-family: 'TimesDot';
+  z-index: 99999;
+  all: unset;
+  font-size: 4rem;
+  padding: 0.5rem 1.5rem;
+  color: black;
+  border-radius: 999px;
+ text-decoration: underline;
+
+  transition: background 0.2s ease;
+  background: rgba(255, 255, 255); /* semi-transparent white */
+ outline: none;
+ text-decoration-thickness: 3px;
+ text-underline-offset: 3px;
+}
+
+.reload-btn:hover {
+  background:#3AEA00;
+}
+
+.top-nav {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+
+  z-index: 99999;
+  background: transparent;
+}
+
+
+.top-nav a {
+  text-decoration: none;
+
+}

@@ -343,6 +343,12 @@ body,
   .emoji-pop {
     font-size: 3rem;
   }
+
+  .audio-footer-line {
+  position:fixed;
+  bottom: 3rem;
+  font-size: 1.2rem;
+}
 }
 
 /* Small phones */

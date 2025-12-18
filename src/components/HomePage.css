@@ -258,9 +258,9 @@ body,
   /* very small phones (optional) */
 @media (max-width: 680px) {
 
-  .draggable-grid__item.size-small  { font-size: 1.1em; }  /* 85% of base */
-  .draggable-grid__item.size-medium { font-size: 1.5em; }     /* 100% of base */
-  .draggable-grid__item.size-large  { font-size: 2em; }   /* 150% of base */
+  .draggable-grid__item.size-small  { font-size: 1em; }  /* 85% of base */
+  .draggable-grid__item.size-medium { font-size: 1.25em; }     /* 100% of base */
+  .draggable-grid__item.size-large  { font-size: 1.6em; }   /* 150% of base */
 
   .section--board {
     max-width: 90vw;
@@ -338,7 +338,7 @@ body,
 
 /* Phones */
 @media (max-width: 600px) {
-  :root { --pill-max-ch: 28ch; --pill-pad-x: 20px; --board-gap: 16px; }
+  :root { --pill-max-ch: 24ch; --pill-pad-x: 12px; --board-gap: 8px; }
   .app-container {padding-top: 0vh;}
   .emoji-pop {
     font-size: 3rem;
@@ -347,7 +347,7 @@ body,
 
 /* Small phones */
 @media (max-width: 400px) {
-  :root { --pill-max-ch: 26ch; --pill-pad-x: 16px; --board-gap: 12px; 
+  :root { --pill-max-ch: 24ch; --pill-pad-x: 12px; --board-gap: 8px; 
   }
 }
 

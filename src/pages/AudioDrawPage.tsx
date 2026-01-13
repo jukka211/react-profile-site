@@ -322,12 +322,12 @@ export default function AudioDrawPage() {
     <div className="draw-page">
       <button
         type="button"
-        className="screen-nav-button"
-        aria-label="Go to Draw Page"
-        onClick={() => navigate("/draw")}
-      />
-
-      <div className="audio-footer-line">Speakerin, Authorin, Unternehmerin</div>
+        className="info-nav-button"
+        aria-label="Show Info"
+        onClick={() => setShowInfo(true)}
+      >
+        info
+      </button>
 
       <div ref={canvasRef} className="draw-canvas" role="application">
         {spawns.map((s) => {

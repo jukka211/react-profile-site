@@ -21,6 +21,12 @@ export type InfoCard = {
   order?: number;
 };
 
+export type NewsItem = {
+  text: string;
+  url?: string;
+  order?: number;
+};
+
 type NameEntry = { title: string };
 
 type ContentCtx = {
@@ -28,6 +34,7 @@ type ContentCtx = {
   title: string;
   blocks: BlockData[];
   infoCards: InfoCard[];     // 👈 expose new model here
+  newsItems: NewsItem[];
   error?: string;
 };
 
@@ -39,12 +46,13 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     title: "",
     blocks: [],
     infoCards: [],
+    newsItems: [],
   });
 
   useEffect(() => {
     (async () => {
       try {
-        const [nameRes, blockRes, infoRes] = await Promise.all([
+        const [nameRes, blockRes, infoRes, newsRes] = await Promise.all([
           client.getEntries<NameEntry>({
             content_type: "name",
             limit: 1,
@@ -59,6 +67,12 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
             limit: 3,
             order: "fields.order",               // ascending by order
             select: ["fields.title", "fields.body", "fields.order"],
+          }),
+          client.getEntries({
+            content_type: "newsItem",
+            limit: 50,
+            order: "fields.order",
+            select: ["fields.text", "fields.url", "fields.order"],
           }),
         ]);
 
@@ -102,13 +116,26 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
           .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
           .slice(0, 3);
 
-        setState({ loading: false, title, blocks, infoCards });
+        const newsItems: NewsItem[] = newsRes.items
+          .map((it: any) => {
+            const f = it.fields as any;
+            return {
+              text: (f.text ?? f.title ?? "").toString(),
+              url: f.url as string | undefined,
+              order: typeof f.order === "number" ? f.order : 9999,
+            };
+          })
+          .filter((n) => n.text.trim().length > 0)
+          .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
+
+        setState({ loading: false, title, blocks, infoCards, newsItems });
       } catch (e: any) {
         setState({
           loading: false,
           title: "Error",
           blocks: [],
           infoCards: [],
+          newsItems: [],
           error: e?.message || "Load failed",
         });
       }

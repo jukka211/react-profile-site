@@ -7,10 +7,10 @@ import React, {
   useState,
 } from "react";
 import { useContent, type BlockData } from "../content/useContent";
-import EmojiPopper from "../components/EmojiPopper";
+
 import { useNavigate } from "react-router-dom";
 
-import "../components/HomePage.css";
+import "./AudioDrawPage.css";
 
 
 // ---------------- CONFIG ----------------
@@ -297,8 +297,6 @@ export default function AudioDrawPage() {
           </button>
         </nav>
 
-        <EmojiPopper selector="body" size="5rem" durationMs={800} />
-
         <div className="app-container">
           <h1 className="app-title">{title}</h1>
 
@@ -324,7 +322,7 @@ export default function AudioDrawPage() {
         type="button"
         className="info-nav-button"
         aria-label="Show Info"
-        onClick={() => setShowInfo(true)}
+        onClick={() => navigate("/draw")}
       >
         info
       </button>

@@ -1,178 +1,128 @@
-@font-face {
-  font-family: "TimesDot";
-  src: url("TimesDotRom.otf") format("opentype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+/* DrawPage-only size boosts */
+.draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.4em; }
+.draw-page-buttons .draggable-grid__item.size-medium { font-size: 6em; }
+.draw-page-buttons .draggable-grid__item.size-large  { font-size: 13em; }
+
+
+.draw-page-buttons .draggable-grid__item {
+  transform-origin: center;
 }
 
-/* Proportional font scaling */
-:root {
-  --scale: 1; /* desktop */
+.draw-page-buttons .draggable-grid__item:hover {
+  transform: scale(1.05);
 }
 
-@media (max-width: 768px) {
-  :root {
-    --scale: 0.78; /* tablet */
-  }
-  
+
+.news-page {
+  --news-ticker-height: auto;
 }
 
-@media (max-width: 480px) {
-  :root {
-    --scale: 0.55; /* mobile */
-  }
-
+.news-ticker {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--news-ticker-height);
+  overflow: hidden;
+  z-index: 100000;
 }
 
-/* Global selection style */
-::selection {
-  background: lime;
-  color: black;
-}
-::-moz-selection {
-  background: lime;
-  color: black;
-}
-
-/* Page root */
-.drawpage-root {
-  padding: 0;
-  margin: 0;
-  line-height: 1.1;
-  font-size: calc(3.5rem * var(--scale));
-  text-align: center;
-  font-family: "TimesDot";
-}
-
-/* Content */
-.text-block {
-  padding: 0 13vw;
-}
-
-.title {
-  font-size: calc(7rem * var(--scale));
-  line-height: 1.1;
-}
-
-/* Newsletter Tel. eMail + Trainerprofil. */
-.cta-big-lime,
-.cta-big-blue,
-.cta-big-violet,
-.cta-big-brown {
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-thickness: 6px;
-  font-size: calc(7rem * var(--scale));
-  font-weight: normal;
-  text-underline-offset: 6px;
-  transition: letter-spacing 0.3s ease-in-out;
-}
-
-.cta-big-lime:hover,
-.cta-big-blue:hover,
-.cta-big-violet:hover,
-.cta-big-brown:hover {
-  color: #000;
-}
-
-.cta-big-lime {
-  color: lime;
-}
-.cta-big-blue {
-  color: #3b9dff;
-}
-.cta-big-violet {
-  color: #ff0000;
-}
-.cta-big-brown {
-  color: #ff6a00;
-}
-
-/* Instagram🤣FB */
-.cta-insta,
-.cta-fb,
-.cta-daten,
-.cta-linkedin {
-  background-color: yellow;
-  border-radius: 2rem;
-  padding: 0.2em 0.6em;
-  font-size: calc(2rem * var(--scale));
-  font-weight: normal;
-  display: inline-block;
-  margin: 0;
-  cursor: pointer;
-}
-
-.cta-daten {
-  background-color: rgb(205, 205, 205);
-  cursor: pointer;
-}
-
-.cta-insta {
-  font-size: calc(5rem * var(--scale));
-  border-radius: 5rem;
-  padding: 0em 0.2em;
-}
-
-.cta-fb {
-  background-color: orange;
-}
-
-.cta-linkedin {
-  background-color: lime;
-}
-
-.cta-insta:hover,
-.cta-fb:hover,
-.cta-daten:hover,
-.cta-linkedin:hover {
-  background-color: #000;
-  color: #fff;
-}
-
-.first-line {
-  font-size: calc(5rem * var(--scale));
-}
-
-/* Ticker */
-.ticker-wrapper {
-  overflow-x: hidden;
+.news-ticker__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
   white-space: nowrap;
-  box-sizing: border-box;
+  width: max-content;
+  padding: 0 1.5rem;
+  animation: news-ticker-scroll 24s linear infinite;
 }
 
-.ticker {
-  display: inline-block;
-  animation: ticker-move 20s linear infinite;
+.news-ticker__item {
+  font-family: 'TimesDot';
+  font-size: clamp(8rem, 12vw, 21rem);
+  line-height: 1;
+  color: #000000;
 }
 
-.ticker span {
-  display: inline-block;
-  padding-top: 10px;
-  color: #ff0000;
-  font-size: calc(7rem * var(--scale));
-  line-height: 1.1;
-  cursor: pointer;
+.news-ticker__link {
+  text-decoration: none;
+  color: inherit;
+}
+.news-ticker__item:hover {
+  color: #3AEA00;
   text-decoration: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 3px;
+}
+@keyframes news-ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-.ticker span:hover {
-  color: lime;
+.draggable-grid {
+  position: fixed;
+  top:25vh;
+    width: 60%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;   /* try 'space-between' if you want full row spread */
+    align-items: flex-start;
+    gap: 20px;
+    margin: 0 auto;  
+    padding: 0;
+  }
+
+
+.draw-info-button {
+  --draw-info-size: 4rem;
+  font-size: var(--draw-info-size);
+  transition: none;
 }
 
-@keyframes ticker-move {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
+.draw-info-button:hover {
+  background-color:#3AEA00;
+  font-size: var(--draw-info-size);
+  top: auto;
+  bottom: 1.4rem;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, 0) scale(1);
+  border-radius: 3rem;
+  overflow: visible;
+}
+
+@media (max-width: 680px) {
+  .draw-info-button {
+    --draw-info-size: 2.1rem;
   }
 }
-@media (max-width: 480px) {
-  .text-block {
-    padding: 0 12px;
+
+@media (max-width: 680px) {
+  .news-ticker__item {
+    margin-top: 8px;
+    font-size: clamp(4rem, 9vw, 7rem);
   }
+
+  .draggable-grid {
+    position: fixed;
+    width: 100%;
+    top:15vh;
+    gap: 10px;
+    }
+}
+
+@media (max-width: 1400px) {
+  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.8em; }
+  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 2.4em; }
+  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 3.9em; }
+}
+
+@media (max-width: 880px) {
+  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.65em; }
+  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 2.1em; }
+  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 2.7em; }
+}
+
+@media (max-width: 680px) {
+  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1em; }
+  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 2.5em; }
+  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 4em; }
 }

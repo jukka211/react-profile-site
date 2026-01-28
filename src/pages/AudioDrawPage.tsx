@@ -96,7 +96,11 @@ export default function AudioDrawPage() {
   const lastSpawnRef = useRef(0);
   const nextIndexRef = useRef(0);
 
-  const usable = useMemo(() => blocks, [blocks]);
+  const usable = useMemo(() => {
+    const allowed = new Set(["one", "loose"]);
+    return (blocks || []).filter((b) => allowed.has(b.section));
+  }, [blocks]);
+  
 
   // Cleanup old spawns (pills + emojis)
   useEffect(() => {

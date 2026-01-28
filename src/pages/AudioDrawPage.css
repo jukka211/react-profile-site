@@ -531,6 +531,14 @@ body,
   bottom: 1rem;
   font-size: 1.2rem;
 }
+.info-nav-button:hover{
+  font-size: 12rem;
+  top: 50%;
+  width: 97vw;
+  height: 97vh;
+  border-radius: 15rem;
+}
+
 }
 
 /* Small phones */

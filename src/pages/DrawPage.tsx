@@ -1,3 +1,4 @@
+// src/pages/DrawPage.tsx  (your DrawPage file)
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useContent } from "../content/useContent";
@@ -30,12 +31,10 @@ export default function DrawPage() {
   if (loading) return <div className="app-loading">Loading…</div>;
   if (error) return <div className="app-loading">Failed to load: {error}</div>;
 
-  const tickerItems = (newsItems || [])
-    .sort(
-      (a, b) =>
-        (a.order ?? 9999) - (b.order ?? 9999) ||
-        a.text.localeCompare(b.text)
-    );
+  const tickerItems = (newsItems || []).sort(
+    (a, b) =>
+      (a.order ?? 9999) - (b.order ?? 9999) || a.text.localeCompare(b.text)
+  );
 
   const hasNews = tickerItems.length > 0;
 
@@ -43,13 +42,15 @@ export default function DrawPage() {
     .filter((b) => b.section === "two")
     .sort(
       (a, b) =>
-        (a.order ?? 9999) - (b.order ?? 9999) ||
-        a.text.localeCompare(b.text)
+        (a.order ?? 9999) - (b.order ?? 9999) || a.text.localeCompare(b.text)
     );
 
   const items = sectionTwoBlocks.map((b, i) => {
-    const href = normalizeURL(b.url);
+    // ✅ Prefer PDF URL if present, fallback to normal url
+    const href = normalizeURL(b.pdfUrl || b.url);
+    const isPdf = !!href && /\.pdf(\?|#|$)/i.test(href);
     const isHttp = href ? /^https?:/i.test(href) : false;
+
     const cmsClasses = (b.classes || []).join(" ");
     const white = isWhiteColor(b.bgColor);
 
@@ -71,8 +72,9 @@ export default function DrawPage() {
         href={href || "#"}
         className={className}
         style={style}
-        target={isHttp ? "_blank" : undefined}
-        rel={isHttp ? "noopener noreferrer" : undefined}
+        // ✅ Open PDFs in a new tab (browser PDF viewer allows download)
+        target={isPdf || isHttp ? "_blank" : undefined}
+        rel={isPdf || isHttp ? "noopener noreferrer" : undefined}
       >
         {b.imageUrl && (
           <img
@@ -92,7 +94,9 @@ export default function DrawPage() {
       const isHttp = href ? /^https?:/i.test(href) : false;
       const key = `${isClone ? "clone" : "main"}-${i}`;
       const commonProps = {
-        className: href ? "news-ticker__item news-ticker__link" : "news-ticker__item",
+        className: href
+          ? "news-ticker__item news-ticker__link"
+          : "news-ticker__item",
         "aria-hidden": isClone ? true : undefined,
       };
 
@@ -118,7 +122,14 @@ export default function DrawPage() {
     });
 
   return (
-    <div className="news-page" style={!hasNews ? ({ "--news-ticker-height": "0px" } as React.CSSProperties) : undefined}>
+    <div
+      className="news-page"
+      style={
+        !hasNews
+          ? ({ "--news-ticker-height": "0px" } as React.CSSProperties)
+          : undefined
+      }
+    >
       {hasNews && (
         <div className="news-ticker" role="region" aria-label="News">
           <div className="news-ticker__track">
@@ -139,7 +150,11 @@ export default function DrawPage() {
 
       <div className="center-page draw-page-buttons">
         <div className="draggable-grid">
-          {items.length > 0 ? items : <div className="app-loading">No items in section "two".</div>}
+          {items.length > 0 ? (
+            items
+          ) : (
+            <div className="app-loading">No items in section "two".</div>
+          )}
         </div>
       </div>
     </div>

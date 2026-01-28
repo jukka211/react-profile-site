@@ -6,6 +6,11 @@ export type BlockData = {
   section: string;
   text: string;
   url?: string;
+
+  // ✅ NEW: PDF asset from Contentful (field: pdfDokument)
+  pdfUrl?: string;
+  pdfFileName?: string;
+
   bgColor: string;
   expandedText?: string;
   expandedImage?: string;
@@ -33,7 +38,7 @@ type ContentCtx = {
   loading: boolean;
   title: string;
   blocks: BlockData[];
-  infoCards: InfoCard[];     // 👈 expose new model here
+  infoCards: InfoCard[];
   newsItems: NewsItem[];
   error?: string;
 };
@@ -56,16 +61,17 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
           client.getEntries<NameEntry>({
             content_type: "name",
             limit: 1,
-            select: ["fields.title"],            // minimal payload
+            select: ["fields.title"],
           }),
           client.getEntries({
             content_type: "block",
             limit: 100,
+            include: 2, // ✅ IMPORTANT: resolve linked assets (image, expandedImage, pdfDokument)
           }),
           client.getEntries({
-            content_type: "infoCard",            // 👈 your new model
+            content_type: "infoCard",
             limit: 3,
-            order: "fields.order",               // ascending by order
+            order: "fields.order",
             select: ["fields.title", "fields.body", "fields.order"],
           }),
           client.getEntries({
@@ -85,18 +91,33 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
           const imageUrl = iconRaw?.startsWith("//") ? `https:${iconRaw}` : iconRaw;
 
           const expandedRaw: string | undefined = f.expandedImage?.fields?.file?.url;
-          const expandedImage = expandedRaw?.startsWith("//") ? `https:${expandedRaw}` : expandedRaw;
+          const expandedImage = expandedRaw?.startsWith("//")
+            ? `https:${expandedRaw}`
+            : expandedRaw;
+
+          // ✅ NEW: PDF asset extraction
+          const pdfRaw: string | undefined = f.pdfDokument?.fields?.file?.url;
+          const pdfUrl = pdfRaw ? (pdfRaw.startsWith("//") ? `https:${pdfRaw}` : pdfRaw) : undefined;
+          const pdfFileName: string | undefined = f.pdfDokument?.fields?.file?.fileName;
 
           let classes: string[] = [];
           if (Array.isArray(f.classes)) classes = f.classes;
           else if (typeof f.classes === "string")
-            classes = f.classes.split(/[,\s]+/).map((s: string) => s.trim()).filter(Boolean);
+            classes = f.classes
+              .split(/[,\s]+/)
+              .map((s: string) => s.trim())
+              .filter(Boolean);
           else if (Array.isArray(f.classTokens)) classes = f.classTokens;
 
           return {
             section: f.section,
             text: f.text,
             url: f.url,
+
+            // ✅ expose PDF info for components
+            pdfUrl,
+            pdfFileName,
+
             bgColor: (f.color || "#eee").trim(),
             expandedText: f.expandedText || f.description,
             expandedImage,

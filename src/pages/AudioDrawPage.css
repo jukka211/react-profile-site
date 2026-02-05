@@ -127,7 +127,7 @@ body,
     font-size: clamp(1rem, calc(0.5rem + 2vw), 2rem);
     line-height: 110%;
     background: transparent;
-    padding: 1.2rem 28px;
+    padding: 1.1rem 28px;
     transition: all 0.3s ease;
     border: none !important;
     outline: none !important;
@@ -187,7 +187,7 @@ body,
     text-align: center;
    user-select: none;
     /* fluid title: min 3rem, ideal 10vw, max 12rem */
-    font-size: clamp(1.1rem, 25vw, 20rem);
+    font-size: 21rem;
   
     font-weight: 200;
     line-height: 80%;
@@ -195,7 +195,20 @@ body,
   }
 
 
+/* ≤ 1280 */
+@media (max-width: 1280px) {
+  h1 { font-size: 10rem; }
+}
 
+/* 1281–1536 */
+@media (min-width: 1281px) and (max-width: 1536px) {
+  h1 { font-size: 16rem; }
+}
+
+/* ≥ 1537 */
+@media (min-width: 1537px) {
+  h1 { font-size: 21rem; }
+}
 
 
 
@@ -427,56 +440,7 @@ body,
   
 
 
-  /* very small phones (optional) */
-@media (max-width: 680px) {
 
-  .draggable-grid__item.size-small  { font-size: 1em; }  /* 85% of base */
-  .draggable-grid__item.size-medium { font-size: 1.25em; }     /* 100% of base */
-  .draggable-grid__item.size-large  { font-size: 1.6em; }   /* 150% of base */
-
-  .section--board {
-    max-width: 90vw;
-    margin: 0 auto;           /* 👈 center the board horizontally */
-    display: flex;
-    justify-content: center;  
-    gap: 0px; /* 👈 center contents inside */
-  }
-  
-  .section--one,
-  .section--two-inner {
-    max-width: 90vw;   /* or whatever fits */
-    margin: 0 auto;    /* 👈 center the inner section inside its board-item */
-    display: flex;
-    justify-content: center;
-  }
-  h1 {
-    font-size: min(22vw, 4rem);   /* ~22% of screen width, max 4.2rem */
-    text-wrap: balance;
-    padding-top: 2rem;
-    padding-bottom: 0.5rem;
-  }
-  .detail-pill__text {
-
-    max-width: 100vw;
-  
-  }
-
-  .draggable-grid__item {
-    border-radius: 48px;
-    padding: 14px 24px;
-  }
-
-  .info-nav-button {
-    font-family: 'TimesDot';
-    position: fixed;
-    bottom: 1.4rem;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 2.1rem;
-    color: black !important;
-  }
-
-}
 
 
 /* Defaults (desktop/laptop) */
@@ -559,15 +523,96 @@ body,
   .draggable-grid__icon { height: 3.8em; }
 }
 
-/* Optional: soften size multipliers on small screens */
-@media (max-width: 1400px) {
-  .draggable-grid__item.size-small  { font-size: 1.2em; }
-  .draggable-grid__item.size-medium { font-size: 1.6em; }
-  .draggable-grid__item.size-large  { font-size: 2.6em; }
-}
-@media (max-width: 880px) {
-  .draggable-grid__item.size-small  { font-size: 1.1em; }
-  .draggable-grid__item.size-medium { font-size: 1.4em; }
-  .draggable-grid__item.size-large  { font-size: 1.8em; }
+/* ≤ 1280 */
+@media (max-width: 1280px) {
+  h1 { font-size: 10rem; }
+
+  .draggable-grid__item {
+    max-width: clamp(21ch, 30vw, 21ch);
+    padding: 0.9rem 21px;
+  }
+
+  .draggable-grid__item.size-small  { font-size: 0.7em; }
+  .draggable-grid__item.size-medium { font-size: 1.2em; }
+  .draggable-grid__item.size-large  { font-size: 2em; }
 }
 
+/* 1281–1536 */
+@media (min-width: 1281px) and (max-width: 1700px) {
+  h1 { font-size: 16rem; }
+
+  .draggable-grid__item {
+    max-width: clamp(26ch, 37vw, 26ch);
+    padding: 1.1rem 26px;
+  }
+
+  .draggable-grid__item.size-small  { font-size: 1.28em; }
+  .draggable-grid__item.size-medium { font-size: 2.11em; }
+  .draggable-grid__item.size-large  { font-size: 3.21em; }
+}
+
+/* ≥ 1537 */
+@media (min-width: 1701px) {
+  h1 { font-size: 21rem; }
+
+  .draggable-grid__item {
+    max-width: clamp(28ch, 40vw, 28ch);
+    padding: 1.2rem 28px;
+  }
+
+  .draggable-grid__item.size-small  { font-size: 1.4em; }
+  .draggable-grid__item.size-medium { font-size: 2.3em; }
+  .draggable-grid__item.size-large  { font-size: 3.5em; }
+}
+
+
+  /* very small phones (optional) */
+  @media (max-width: 680px) {
+
+    .draggable-grid__item.size-small  { font-size: 1em; }  /* 85% of base */
+    .draggable-grid__item.size-medium { font-size: 1.25em; }     /* 100% of base */
+    .draggable-grid__item.size-large  { font-size: 1.6em; }   /* 150% of base */
+  
+    .section--board {
+      max-width: 90vw;
+      margin: 0 auto;           /* 👈 center the board horizontally */
+      display: flex;
+      justify-content: center;  
+      gap: 0px; /* 👈 center contents inside */
+    }
+    
+    .section--one,
+    .section--two-inner {
+      max-width: 90vw;   /* or whatever fits */
+      margin: 0 auto;    /* 👈 center the inner section inside its board-item */
+      display: flex;
+      justify-content: center;
+    }
+    h1 {
+      font-size: min(22vw, 4rem);   /* ~22% of screen width, max 4.2rem */
+      text-wrap: balance;
+      padding-top: 2rem;
+      padding-bottom: 0.5rem;
+    }
+    .detail-pill__text {
+  
+      max-width: 100vw;
+    
+    }
+  
+    .draggable-grid__item {
+      border-radius: 48px;
+      padding: 14px 24px;
+    }
+  
+    .info-nav-button {
+      font-family: 'TimesDot';
+      position: fixed;
+      bottom: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2.1rem;
+      color: black !important;
+    }
+  
+  }

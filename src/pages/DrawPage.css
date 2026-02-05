@@ -1,7 +1,7 @@
 /* DrawPage-only size boosts */
 .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.4em; }
 .draw-page-buttons .draggable-grid__item.size-medium { font-size: 6em; }
-.draw-page-buttons .draggable-grid__item.size-large  { font-size: 13em; }
+.draw-page-buttons .draggable-grid__item.size-large  { font-size: 11em; }
 
 
 .draw-page-buttons .draggable-grid__item {
@@ -109,10 +109,10 @@
     }
 }
 
-@media (max-width: 1400px) {
-  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.8em; }
-  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 2.4em; }
-  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 3.9em; }
+@media (max-width: 1500px) {
+  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.3em; }
+  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 5em; }
+  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 8em; }
 }
 
 @media (max-width: 880px) {

@@ -60,7 +60,7 @@
 .draggable-grid {
   position: fixed;
   top:25vh;
-    width: 60%;
+    width: 65%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;   /* try 'space-between' if you want full row spread */

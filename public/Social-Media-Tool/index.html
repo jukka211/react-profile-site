@@ -6,7 +6,7 @@
   <title>Sabine Reichsthaler Social Media Tool</title>
   <!-- p5.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 
 </head>
 <body>
@@ -90,7 +90,7 @@ let bgColor = 255;
 
 // ====== p5 lifecycle ======
 function preload(){
-  fontTimes = loadFont('TimesDotRom.otf', 
+  fontTimes = loadFont('./TimesDotRom.otf', 
     () => console.log('Font loaded'), 
     () => {
       console.log('Font not found, using fallback');

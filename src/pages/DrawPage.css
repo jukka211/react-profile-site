@@ -271,7 +271,7 @@ html, body {
 
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1700px) {
   .draw-contact-grid .draggable-grid__item.size-small  { font-size: 1.3em; }
   .draw-contact-grid .draggable-grid__item.size-medium { font-size: 5em; }
   .draw-contact-grid .draggable-grid__item.size-large  { font-size: 8em; }
@@ -279,7 +279,7 @@ html, body {
   .event-pill.pill--small{ font-size: 1.1rem; }
   .event-pill.pill--large{ font-size: 1.7rem; }
 
-  .event-title{ font-size: 2.7rem;}
+  .event-title{ font-size: 2.9rem;}
   .event-description{
     font-size: 1.1rem;
   }

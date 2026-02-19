@@ -1,4 +1,4 @@
-// src/pages/DrawPage.tsx  (your DrawPage file)
+// src/pages/DrawPage.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useContent } from "../content/useContent";
@@ -16,37 +16,40 @@ const normalizeURL = (u?: string) => {
 const isWhiteColor = (c?: string | null) => {
   if (!c) return false;
   const v = c.trim().toLowerCase();
-  return (
-    v === "#fff" ||
-    v === "#ffffff" ||
-    v === "white" ||
-    v === "rgb(255,255,255)"
-  );
+  return v === "#fff" || v === "#ffffff" || v === "white" || v === "rgb(255,255,255)";
 };
+
+// Palette for "random" pill colors
+const PALETTE = ["#3AEA00", "#FF6A00", "#FFE500", "#3B9DFF", "#DF61BD", "#D5987C"];
+
+// Stable hash -> consistent random-ish color per (eventId + text)
+function hashToIndex(input: string, mod: number) {
+  let h = 0;
+  for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) >>> 0;
+  return h % mod;
+}
+function pillColor(eventId: string, text: string) {
+  return PALETTE[hashToIndex(`${eventId}::${text}`, PALETTE.length)];
+}
+
+// Stable random size (small / large) per pill
+function pillIsLarge(eventId: string, text: string) {
+  return hashToIndex(`${eventId}::${text}::size`, 2) === 1;
+}
 
 export default function DrawPage() {
   const navigate = useNavigate();
-  const { loading, blocks, error, newsItems } = useContent();
+  const { loading, error, blocks, eventPostings } = useContent();
 
   if (loading) return <div className="app-loading">Loading…</div>;
   if (error) return <div className="app-loading">Failed to load: {error}</div>;
 
-  const tickerItems = (newsItems || []).sort(
-    (a, b) =>
-      (a.order ?? 9999) - (b.order ?? 9999) || a.text.localeCompare(b.text)
-  );
-
-  const hasNews = tickerItems.length > 0;
-
+  // CONTACT BUTTONS (same as before): section "two"
   const sectionTwoBlocks = (blocks || [])
     .filter((b) => b.section === "two")
-    .sort(
-      (a, b) =>
-        (a.order ?? 9999) - (b.order ?? 9999) || a.text.localeCompare(b.text)
-    );
+    .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999) || a.text.localeCompare(b.text));
 
-  const items = sectionTwoBlocks.map((b, i) => {
-    // ✅ Prefer PDF URL if present, fallback to normal url
+  const contactItems = sectionTwoBlocks.map((b, i) => {
     const href = normalizeURL(b.pdfUrl || b.url);
     const isPdf = !!href && /\.pdf(\?|#|$)/i.test(href);
     const isHttp = href ? /^https?:/i.test(href) : false;
@@ -62,17 +65,14 @@ export default function DrawPage() {
         : {}),
     };
 
-    const className = ["draggable-grid__item", cmsClasses]
-      .filter(Boolean)
-      .join(" ");
+    const className = ["draggable-grid__item", cmsClasses].filter(Boolean).join(" ");
 
     return (
       <a
-        key={`two-${i}`}
+        key={`contact-${i}`}
         href={href || "#"}
         className={className}
         style={style}
-        // ✅ Open PDFs in a new tab (browser PDF viewer allows download)
         target={isPdf || isHttp ? "_blank" : undefined}
         rel={isPdf || isHttp ? "noopener noreferrer" : undefined}
       >
@@ -88,74 +88,99 @@ export default function DrawPage() {
     );
   });
 
-  const renderNewsItems = (list: typeof tickerItems, isClone: boolean) =>
-    list.map((b, i) => {
-      const href = normalizeURL(b.url);
-      const isHttp = href ? /^https?:/i.test(href) : false;
-      const key = `${isClone ? "clone" : "main"}-${i}`;
-      const commonProps = {
-        className: href
-          ? "news-ticker__item news-ticker__link"
-          : "news-ticker__item",
-        "aria-hidden": isClone ? true : undefined,
-      };
-
-      if (href) {
-        return (
-          <a
-            key={key}
-            href={href}
-            target={isHttp ? "_blank" : undefined}
-            rel={isHttp ? "noopener noreferrer" : undefined}
-            {...commonProps}
-          >
-            {b.text}
-          </a>
-        );
-      }
-
-      return (
-        <span key={key} {...commonProps}>
-          {b.text}
-        </span>
-      );
-    });
+  const events = (eventPostings || [])
+    .slice()
+    .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
 
   return (
-    <div
-      className="news-page"
-      style={
-        !hasNews
-          ? ({ "--news-ticker-height": "0px" } as React.CSSProperties)
-          : undefined
-      }
-    >
-      {hasNews && (
-        <div className="news-ticker" role="region" aria-label="News">
-          <div className="news-ticker__track">
-            {renderNewsItems(tickerItems, false)}
-            {renderNewsItems(tickerItems, true)}
+    <div className="draw-page">
+      <div className="draw-topbar">
+        <button
+          type="button"
+          className="info-nav-button draw-info-button"
+          aria-label="Back to start"
+          onClick={() => navigate("/")}
+        >
+          back
+        </button>
+
+        {/* Contact buttons, centered horizontally */}
+        <div className="draggable-grid draw-contact-grid">{contactItems}</div>
+      </div>
+
+
+      {/* Event-Postings grid */}
+      <div className="draw-events-wrap">
+        {events.length === 0 ? (
+          <div className="app-loading">No Event-Postings found.</div>
+        ) : (
+          <div className="event-grid" aria-label="Event postings">
+            {events.map((ev) => {
+              const href = normalizeURL(ev.url || undefined);
+              const isHttp = href ? /^https?:/i.test(href) : false;
+
+              // RULES:
+              // - If image selected => image fills card, hide title + custom fields
+              // - If no image => show centered title + pills (no image area)
+              const hasImage = !!ev.imageUrl;
+
+              const CardInner = (
+                <div className={`event-card ${hasImage ? "is-image" : "is-text"}`}>
+                  {hasImage ? (
+                    <img
+                      src={ev.imageUrl}
+                      alt={ev.imageAlt || "Event image"}
+                      className="event-card__imgFill"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="event-card__center">
+                      {!!ev.title && <div className="event-title">{ev.title}</div>}
+                      {!!ev.description && <div className="event-description">{ev.description}</div>}
+
+                      {!!ev.customFields?.length && (
+                        <div className="event-pills">
+                          {ev.customFields.map((text, idx) => {
+                            const large = pillIsLarge(ev.id, text);
+                            return (
+                              <span
+                                key={`${ev.id}-cf-${idx}`}
+                                className={`event-pill ${large ? "pill--large" : "pill--small"}`}
+                                style={{ backgroundColor: pillColor(ev.id, text) }}
+                              >
+                                {text}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+
+              if (href) {
+                return (
+                  <a
+                    key={ev.id}
+                    href={href}
+                    className="event-cardLink"
+                    target={isHttp ? "_blank" : undefined}
+                    rel={isHttp ? "noopener noreferrer" : undefined}
+                  >
+                    {CardInner}
+                  </a>
+                );
+              }
+
+              return (
+                <div key={ev.id} className="event-cardLink">
+                  {CardInner}
+                </div>
+              );
+            })}
           </div>
-        </div>
-      )}
-
-      <button
-        type="button"
-        className="info-nav-button draw-info-button"
-        aria-label="Back to start"
-        onClick={() => navigate("/")}
-      >
-        back
-      </button>
-
-      <div className="center-page draw-page-buttons">
-        <div className="draggable-grid">
-          {items.length > 0 ? (
-            items
-          ) : (
-            <div className="app-loading">No items in section "two".</div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

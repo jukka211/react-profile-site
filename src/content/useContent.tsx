@@ -7,7 +7,7 @@ export type BlockData = {
   text: string;
   url?: string;
 
-  // ✅ NEW: PDF asset from Contentful (field: pdfDokument)
+  // PDF asset from Contentful (field: pdfDokument)
   pdfUrl?: string;
   pdfFileName?: string;
 
@@ -26,10 +26,21 @@ export type InfoCard = {
   order?: number;
 };
 
-export type NewsItem = {
-  text: string;
-  url?: string;
+// ✅ Event-Posting model (5 optional custom text fields -> mapped into customFields[])
+export type EventPosting = {
+  id: string;
   order?: number;
+  url?: string;
+
+  imageUrl?: string;
+  imageAlt?: string;
+
+  title?: string;
+
+  // ✅ NEW
+  description?: string;
+
+  customFields: string[];
 };
 
 type NameEntry = { title: string };
@@ -39,7 +50,7 @@ type ContentCtx = {
   title: string;
   blocks: BlockData[];
   infoCards: InfoCard[];
-  newsItems: NewsItem[];
+  eventPostings: EventPosting[];
   error?: string;
 };
 
@@ -51,13 +62,13 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     title: "",
     blocks: [],
     infoCards: [],
-    newsItems: [],
+    eventPostings: [],
   });
 
   useEffect(() => {
     (async () => {
       try {
-        const [nameRes, blockRes, infoRes, newsRes] = await Promise.all([
+        const [nameRes, blockRes, infoRes, eventRes] = await Promise.all([
           client.getEntries<NameEntry>({
             content_type: "name",
             limit: 1,
@@ -66,7 +77,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
           client.getEntries({
             content_type: "block",
             limit: 100,
-            include: 2, // ✅ IMPORTANT: resolve linked assets (image, expandedImage, pdfDokument)
+            include: 2, // resolve linked assets (image, expandedImage, pdfDokument)
           }),
           client.getEntries({
             content_type: "infoCard",
@@ -74,11 +85,11 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
             order: "fields.order",
             select: ["fields.title", "fields.body", "fields.order"],
           }),
+          // ✅ Event-Postings (ensure API ID is exactly "eventPosting")
           client.getEntries({
-            content_type: "newsItem",
-            limit: 50,
-            order: "fields.order",
-            select: ["fields.text", "fields.url", "fields.order"],
+            content_type: "eventPosting",
+            limit: 200,
+            include: 2, // resolve image asset
           }),
         ]);
 
@@ -95,7 +106,6 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
             ? `https:${expandedRaw}`
             : expandedRaw;
 
-          // ✅ NEW: PDF asset extraction
           const pdfRaw: string | undefined = f.pdfDokument?.fields?.file?.url;
           const pdfUrl = pdfRaw ? (pdfRaw.startsWith("//") ? `https:${pdfRaw}` : pdfRaw) : undefined;
           const pdfFileName: string | undefined = f.pdfDokument?.fields?.file?.fileName;
@@ -114,7 +124,6 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
             text: f.text,
             url: f.url,
 
-            // ✅ expose PDF info for components
             pdfUrl,
             pdfFileName,
 
@@ -137,26 +146,46 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
           .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999))
           .slice(0, 3);
 
-        const newsItems: NewsItem[] = newsRes.items
+        const eventPostings: EventPosting[] = (eventRes.items || [])
           .map((it: any) => {
             const f = it.fields as any;
-            return {
-              text: (f.text ?? f.title ?? "").toString(),
-              url: f.url as string | undefined,
-              order: typeof f.order === "number" ? f.order : 9999,
-            };
+
+            const imgRaw: string | undefined = f.image?.fields?.file?.url;
+            const imageUrl = imgRaw ? (imgRaw.startsWith("//") ? `https:${imgRaw}` : imgRaw) : undefined;
+
+            const imageAlt: string | undefined =
+              f.imageAlt || f.image?.fields?.title || f.title || "Event image";
+
+            // ✅ 5 custom text fields (empties removed automatically)
+            const customFields: string[] = [f.field1, f.field2, f.field3, f.field4, f.field5]
+              .filter((x: any) => typeof x === "string" && x.trim().length > 0)
+              .map((x: string) => x.trim())
+              .slice(0, 5);
+
+              return {
+                id: it.sys.id as string,
+                order: typeof f.order === "number" ? f.order : 9999,
+                url: f.url as string | undefined,
+                imageUrl,
+                imageAlt,
+                title: typeof f.title === "string" ? f.title : undefined,
+              
+                // ✅ NEW
+                description: typeof f.description === "string" ? f.description : undefined,
+              
+                customFields,
+              };
           })
-          .filter((n) => n.text.trim().length > 0)
           .sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
 
-        setState({ loading: false, title, blocks, infoCards, newsItems });
+        setState({ loading: false, title, blocks, infoCards, eventPostings });
       } catch (e: any) {
         setState({
           loading: false,
           title: "Error",
           blocks: [],
           infoCards: [],
-          newsItems: [],
+          eventPostings: [],
           error: e?.message || "Load failed",
         });
       }

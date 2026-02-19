@@ -1,76 +1,41 @@
-/* DrawPage-only size boosts */
-.draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.4em; }
-.draw-page-buttons .draggable-grid__item.size-medium { font-size: 6em; }
-.draw-page-buttons .draggable-grid__item.size-large  { font-size: 11em; }
+/* src/pages/DrawPage.css */
 
-
-.draw-page-buttons .draggable-grid__item {
-  transform-origin: center;
+:root{
+  --accent:#111;
+  --bg:#ffffff;
+  --panel:#ffffff;
+  --border:#434343;
+}
+html, body {
+  height: auto;
+  overflow-y: auto;
 }
 
-.draw-page-buttons .draggable-grid__item:hover {
-  transform: scale(1.05);
+.draw-page {
+  min-height: 100vh;
+  overflow-y: auto;
 }
-
-
-.news-page {
-  --news-ticker-height: auto;
-}
-
-.news-ticker {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--news-ticker-height);
-  overflow: hidden;
-  z-index: 100000;
-}
-
-.news-ticker__track {
-  display: inline-flex;
-  align-items: center;
-  gap: 2.5rem;
-  white-space: nowrap;
-  width: max-content;
-  padding: 0 1.5rem;
-  animation: news-ticker-scroll 24s linear infinite;
-}
-
-.news-ticker__item {
+.draw-page{
+  background: var(--bg);
+  min-height: 100vh;
   font-family: 'TimesDot';
-  font-size: clamp(8rem, 12vw, 21rem);
-  line-height: 1;
-  color: #000000;
+  color:#000;
 }
 
-.news-ticker__link {
-  text-decoration: none;
-  color: inherit;
-}
-.news-ticker__item:hover {
-  color: #3AEA00;
-  text-decoration: underline;
-}
-@keyframes news-ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* TOP BAR */
+.draw-topbar{
+  position: relative;
+  top: 0;
+  z-index: 50;
+  background: #fff;
+  padding: 14px 20vw;
+
+  display: flex;
+  align-items: flex-start; 
+  gap: 12px;
 }
 
-.draggable-grid {
-  position: fixed;
-  top:25vh;
-    width: 65%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;   /* try 'space-between' if you want full row spread */
-    align-items: flex-start;
-    gap: 20px;
-    margin: 0 auto;  
-    padding: 0;
-  }
-
-
+/* Back button behavior */
 .draw-info-button {
   --draw-info-size: 4rem;
   font-size: var(--draw-info-size);
@@ -89,40 +54,311 @@
   overflow: visible;
 }
 
+
+
+/* ------------------------------------------------
+   EVENT-POSTINGS GRID (fixed cell ratio)
+   ------------------------------------------------ */
+
+   .draw-events-wrap{
+    max-width: 75vw;
+    margin: 0 auto;
+    padding: 18px;
+    padding-top: 12rem;
+  }
+  
+  .event-grid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  
+  @media (max-width: 1100px){
+    .event-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  
+
+  
+  .event-cardLink{
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+  }
+  
+
+  
+  .event-cardLink:hover .event-card{
+    transform: scale(1.02);
+    background-color: #FFE500;
+    transition: all 150ms ease-in-out;
+  }
+  
+  /* IMAGE MODE */
+  .event-card__imgFill{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  /* TEXT MODE: always centered vertically + horizontally */
+  .event-card__center{
+    position: absolute;
+    inset: 0;
+  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  
+    text-align: center;
+    gap: 18px;
+    padding: 18px;
+  }
+    /* CARD: fixed 4:5 ratio */
+    .event-card{
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      position: relative;
+    
+    
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: 0 0px 5px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transform-origin: center;
+      transition: transform .12s ease;
+    }
+  
+  /* Title fixed size */
+  .event-title{
+    font-family: 'TimesDot';
+    font-size: 4rem;
+    line-height: 0.9;
+    color: #000;
+  }
+  
+  .event-description{
+    font-size: 1.6rem;
+    line-height: 1;
+    color: #000;
+    max-width: 90%;
+  }
+  
+  
+  /* Pills container centered */
+  .event-pills{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;      /* ✅ top-align pills within the row */
+    align-content: flex-start;    /* ✅ when multiple rows exist */
+    gap: 0px;
+    max-width: 100%;
+  }
+  
+  /* Base pill style (wrap text + max width) */
+  .event-pill{
+    display: inline-flex;
+    align-items: flex-start;      /* "top" isn't valid, use flex-start */
+    justify-content: center;
+  
+    max-width: 60%;               /* ✅ pill width limit */
+    padding: 12px 18px;
+    border-radius: 999px;
+  
+    color: #000;
+    font-family: 'TimesDot';
+    line-height: 1;
+  
+    /* ✅ allow wrapping */
+    white-space: normal;
+    overflow-wrap: anywhere;      /* breaks long words if needed */
+    word-break: break-word;
+  
+    /* ✅ remove ellipsis behavior */
+    overflow: visible;
+    text-overflow: clip;
+  }
+  
+  
+  /* Random sizes (assigned via TSX) */
+  .event-pill.pill--small{ font-size: 1.2rem; }
+  .event-pill.pill--large{ font-size: 2rem; }
+
+  .events-heading{
+    max-width: 1500px;
+    margin: 18px auto 0;
+    padding: 0 18px;
+    padding-top: 20rem;
+  
+    font-family: 'TimesDot';
+    font-size: 5rem;
+    line-height: 1;
+    color: #000;
+    text-align: center;
+  }
+
+  
+  
 @media (max-width: 680px) {
-  .draw-info-button {
-    --draw-info-size: 2.1rem;
+  .draw-info-button { --draw-info-size: 2.1rem; }
+}
+
+/* ------------------------------------------------
+   CONTACT BUTTONS: restore old styling + center them
+   ------------------------------------------------ */
+
+.draw-topbar .draw-contact-grid{
+  position: static;
+  top: auto;
+  width: auto;
+
+  flex: 1;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0px;
+
+  margin: 0;
+  padding: 0;
+}
+
+.draw-contact-grid .draggable-grid__item{
+  transform-origin: center;
+}
+.draw-contact-grid .draggable-grid__item:hover{
+  transform: scale(1.05);
+}
+
+.draw-contact-grid .draggable-grid__item.size-small  { font-size: 1.4em; }
+.draw-contact-grid .draggable-grid__item.size-medium { font-size: 6em; }
+.draw-contact-grid .draggable-grid__item.size-large  { font-size: 11em; }
+
+
+@media (min-width: 2500px) {
+  .event-title{ font-size: 5rem;}
+
+  .event-pill.pill--small{ font-size: 2rem; }
+  .event-pill.pill--large{ font-size: 3rem; }
+
+  .event-description{
+    font-size: 2rem;
   }
 }
 
-@media (max-width: 680px) {
-  .news-ticker__item {
-    margin-top: 8px;
-    font-size: clamp(4rem, 9vw, 7rem);
+@media (max-width: 2000px) {
+  .draw-contact-grid .draggable-grid__item.size-small  { font-size: 1.3em; }
+  .draw-contact-grid .draggable-grid__item.size-medium { font-size: 5em; }
+  .draw-contact-grid .draggable-grid__item.size-large  { font-size: 8em; }
+
+  .event-pill.pill--small{ font-size: 1.2rem; }
+  .event-pill.pill--large{ font-size: 2rem; }
+
+  .event-title{ font-size: 3.5rem;}
+  .event-description{
+    font-size: 1.2rem;
   }
 
-  .draggable-grid {
-    position: fixed;
-    width: 100%;
-    top:15vh;
-    gap: 10px;
-    }
+  .draw-events-wrap{
+    max-width: 85vw;}
+
+
 }
 
 @media (max-width: 1500px) {
-  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.3em; }
-  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 5em; }
-  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 8em; }
+  .draw-contact-grid .draggable-grid__item.size-small  { font-size: 1.3em; }
+  .draw-contact-grid .draggable-grid__item.size-medium { font-size: 5em; }
+  .draw-contact-grid .draggable-grid__item.size-large  { font-size: 8em; }
+
+  .event-pill.pill--small{ font-size: 1.1rem; }
+  .event-pill.pill--large{ font-size: 1.7rem; }
+
+  .event-title{ font-size: 2.7rem;}
+  .event-description{
+    font-size: 1.1rem;
+  }
+
+  .draw-events-wrap{
+    max-width: 95vw;}
+
+    .event-card{
+      aspect-ratio: 9 / 16;
+    }
 }
 
 @media (max-width: 880px) {
-  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1.65em; }
-  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 2.1em; }
-  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 2.7em; }
+  .draw-contact-grid .draggable-grid__item.size-small  { font-size: 1.65em; }
+  .draw-contact-grid .draggable-grid__item.size-medium { font-size: 2.1em; }
+  .draw-contact-grid .draggable-grid__item.size-large  { font-size: 2.7em; }
+
+  .event-pill.pill--small{ font-size: 1.0rem; }
+  .event-pill.pill--large{ font-size: 1.4rem; }
+
+  .event-title{ font-size: 2rem;}
+  .event-description{
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 680px) {
-  .draw-page-buttons .draggable-grid__item.size-small  { font-size: 1em; }
-  .draw-page-buttons .draggable-grid__item.size-medium { font-size: 2.5em; }
-  .draw-page-buttons .draggable-grid__item.size-large  { font-size: 4em; }
+  .draw-topbar .draw-contact-grid{ gap: 0px; padding: 0 0; }
+  .draw-topbar {padding: 20px 0; margin: 0 0;}
+  .draw-contact-grid .draggable-grid__item.size-small  { font-size: 1em; }
+  .draw-contact-grid .draggable-grid__item.size-medium { font-size: 2.5em; }
+  .draw-contact-grid .draggable-grid__item.size-large  { font-size: 4em; }
+
+  .event-pill.pill--small{ font-size: 1rem; }
+  .event-pill.pill--large{ font-size: 1.6rem; }
+
+  .event-title{ font-size: 2.8rem;}
+  .draw-events-wrap{
+    max-width: none;
+    width: 100vw;
+    margin: 0 0;
+    padding: 18px;
+    padding-top: 4rem;
+  }
+  .event-description{
+    font-size: 0.95rem;
+  }
+
+  .event-grid{
+    display: flex;          /* ✅ flex instead of grid */
+    flex-direction: column; /* ✅ one column */
+    gap: 12px;
+  }
+
+  .event-card {
+
+  /* ✅ remove fixed ratio */
+  aspect-ratio: auto;
+
+  /* ✅ let height be content-driven, but not too small */
+  min-height: 60vh;
+  height: 100%;
+  }
+  /* TEXT MODE: normal flow (no absolute), centers if short, grows if long */
+.event-card__center{
+  position: relative;      /* ✅ not absolute */
+  inset: auto;
+
+  min-height: 60vh;        /* ✅ same minimum height */
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;     /* horizontal center */
+  justify-content: center; /* vertical center when content is short */
+  text-align: center;
+}
+}
+
+/* Contact buttons row: align buttons to top */
+.draw-topbar .draw-contact-grid{
+  align-items: flex-start;   /* ✅ top align items */
 }

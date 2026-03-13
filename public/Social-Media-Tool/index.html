@@ -4,12 +4,128 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sabine Reichsthaler Social Media Tool</title>
-  <!-- p5.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script>
-  <link rel="stylesheet" href="./style.css">
+  <style>
+    :root {
+      --accent: #111;
+      --bg: #f0f0f0;
+      --panel: #ffffff;
+      --ui-shadow: 0px 0px 3px rgba(0,0,0,0.2);
+    }
+    * { box-sizing: border-box; font-family: 'Times New Roman', Times, serif; }
+    body { margin: 0; background: var(--bg); color: #000; }
 
+    header {
+      position: sticky; top: 0;
+      padding: 14px 18px;
+      background: #fff;
+      box-shadow: var(--ui-shadow);
+      z-index: 10;
+    }
+    header h1 { margin: 0; font-size: 18px; }
+
+    /* ── Layout ── */
+    .wrap {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      padding: 18px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1100px) { .wrap { grid-template-columns: 300px 1fr; } }
+
+    /* Mobile: canvas top, controls below */
+    @media (max-width: 680px) {
+      .wrap {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        gap: 12px;
+      }
+      .wrap > section:last-child { order: -1; }
+      .row .btn.primary { flex: 1; text-align: center; }
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--panel);
+      box-shadow: var(--ui-shadow);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .panel h2 { margin: 0 0 10px; font-size: 20px; color: #333; font-weight: 400; }
+
+    /* ── Row ── */
+    .row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .row > * { min-width: 0; }
+    .row label { font-size: 12px; color: #555; min-width: 72px; flex-shrink: 0; }
+
+    @media (max-width: 360px) {
+      .row { flex-direction: column; align-items: flex-start; }
+      .row label { min-width: 0; }
+    }
+
+    /* ── Inputs ── */
+    input[type=text], select, input[type=file] {
+      flex: 1;
+      padding: 10px 12px;
+      box-shadow: var(--ui-shadow);
+      border: 0; outline: 0;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 14px;
+      min-width: 0;
+    }
+    select { max-width: 160px; }
+    input[type="file"] { flex: 1 1 auto; max-width: 100%; overflow: hidden; }
+
+    /* ── Buttons ── */
+    .btn {
+      appearance: none; -webkit-appearance: none;
+      outline: 0; border: 0;
+      box-shadow: var(--ui-shadow);
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    .btn.primary { background: #111; color: #fff; }
+    .btn:focus-visible { box-shadow: var(--ui-shadow); outline: 0; }
+    .btn:focus, .btn:active { outline: 0; border: 0; }
+    .btn.small { font-size: 12px; padding: 6px 10px; }
+
+    /* ── Fields ── */
+    .grid { display: grid; gap: 10px; }
+    .field { box-shadow: var(--ui-shadow); border-radius: 12px; padding: 10px; }
+    .field.default { box-shadow: var(--ui-shadow); background: #ffffff; }
+    .fieldHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .fieldHead strong { font-size: 13px; font-weight: 400; }
+
+    /* ── Canvas ── */
+    #canvas-holder {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    #canvas-holder canvas {
+      display: block;
+      border-radius: 12px;
+      box-shadow: var(--ui-shadow);
+      background: #ffffff;
+      /* let p5 control dimensions; CSS scales visually */
+      max-width: 100%;
+      height: auto !important;
+      width: auto !important;
+    }
+
+    .divider { height: 0; border: 0; box-shadow: var(--ui-shadow); margin: 16px 0; }
+  </style>
 </head>
 <body>
+
+<header><h1>Social Media Tool</h1></header>
 
 <div class="wrap">
   <section class="panel" id="controls">
@@ -29,7 +145,7 @@
       <span style="font-size:12px;color:#777">1 default field + max 5 custom fields</span>
       <button id="addField" class="btn">+ Add field</button>
     </div>
-    <div id="fields" class="grid" style="font-weight: 400 !important;"></div>
+    <div id="fields" class="grid"></div>
 
     <hr class="divider">
 
@@ -53,7 +169,7 @@
     </div>
   </section>
 
-  <section class="panel" style="box-shadow: none; padding: 0;">
+  <section class="panel" style="box-shadow:none;padding:0;">
     <div id="canvas-holder"></div>
   </section>
 </div>
@@ -61,68 +177,66 @@
 <script>
 // ====== Configuration ======
 const FORMATS = {
-  post: { w: 1080, h: 1350, name: 'Post (1080×1350)' },
-  story: { w: 1080, h: 1920, name: 'Story (1080×1920)' }
+  post:  { w: 1080, h: 1350 },
+  story: { w: 1080, h: 1920 }
 };
 
 let currentFormat = 'post';
 let CANVAS_W = 1080;
 let CANVAS_H = 1350;
 let DISPLAY_SCALE = 1;
-const CANVAS_PADDING = 16; // Added canvas padding
+const CANVAS_PADDING = 16;
 
 const PALETTE = ["#3AEA00","#FF6A00","#FFE500","#3B9DFF","#DF61BD"];
 
 const SIZE_PRESETS = {
-  S: { text: 64, padX: 30, padY: 20, r: 70 },
-  M: { text: 100, padX: 45, padY: 30, r: 90 },
+  S: { text: 64,  padX: 30, padY: 20, r: 70  },
+  M: { text: 100, padX: 45, padY: 30, r: 90  },
   L: { text: 144, padX: 30, padY: 36, r: 130 }
 };
 
-// Fonts
 let fontTimes = null;
-
-// State
 let fields = [];
 let bgImg = null;
 let bgColor = 255;
 
+// ====== Scale helper ======
+function recalcDisplayScale() {
+  const isMobile = window.innerWidth <= 680;
+  let maxW, maxH;
+
+  if (isMobile) {
+    maxW = window.innerWidth - 20;
+    maxH = window.innerHeight * 0.65;
+  } else {
+    const panelW = window.innerWidth <= 1100 ? 300 : 360;
+    maxW = Math.min(window.innerWidth - panelW - 54, 800);
+    maxH = window.innerHeight - 120;
+  }
+
+  const scaleW = maxW / CANVAS_W;
+  const scaleH = maxH / CANVAS_H;
+  DISPLAY_SCALE = Math.min(scaleW, scaleH, 1);
+}
+
 // ====== p5 lifecycle ======
-function preload(){
-  fontTimes = loadFont('./TimesDotRom.otf', 
-    () => console.log('Font loaded'), 
-    () => {
-      console.log('Font not found, using fallback');
-      fontTimes = null;
-    }
+function preload() {
+  fontTimes = loadFont('./TimesDotRom.otf',
+    () => console.log('Font loaded'),
+    () => { fontTimes = null; }
   );
 }
 
-function setup(){
-  console.log('Setup starting...');
-  
-  // Calculate display scale
-  const maxDisplayW = Math.min(window.innerWidth - 450, 800);
-  const maxDisplayH = window.innerHeight - 200;
-  const scaleW = maxDisplayW / CANVAS_W;
-  const scaleH = maxDisplayH / CANVAS_H;
-  DISPLAY_SCALE = Math.min(scaleW, scaleH, 1);
-  
-  console.log('Display scale:', DISPLAY_SCALE);
-  
-  // Create canvas
+function setup() {
+  recalcDisplayScale();
+
   const cnv = createCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
   cnv.parent('canvas-holder');
   pixelDensity(2);
-  
-  // Set font
-  if(fontTimes){
-    textFont(fontTimes);
-  } else {
-    textFont('Times New Roman');
-  }
-  
-  // Initialize fields
+
+  if (fontTimes) textFont(fontTimes);
+  else textFont('Times New Roman');
+
   fields = [{
     id: 'default',
     text: 'Your Text',
@@ -130,591 +244,310 @@ function setup(){
     color: '#FFFFFF',
     isDefault: true
   }];
-  
-  console.log('Fields initialized:', fields);
-  
-  // Setup UI
+
   setupUI();
-  
-  // Render fields UI
   refreshFieldRows();
-  
-  // Draw
   background(255);
-  console.log('Drawing...');
   drawContent();
-  
-  console.log('Setup complete');
+
+  // Handle resize / orientation change
+  window.addEventListener('resize', () => {
+    recalcDisplayScale();
+    resizeCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
+    drawContent();
+  });
 }
 
-function draw(){
-  // We don't use the default draw loop
-}
+function draw() { /* intentionally empty */ }
 
-function drawContent(){
-  console.log('drawContent called, fields:', fields.length);
-  
-  // Clear and setup
+// ====== Drawing ======
+function drawContent() {
   push();
   scale(DISPLAY_SCALE);
-  
-  // Calculate content area with padding
+
   const CONTENT_W = CANVAS_W - CANVAS_PADDING * 2;
   const CONTENT_H = CANVAS_H - CANVAS_PADDING * 2;
-  
+
   // Background
-  if(bgImg){
-    const iw = bgImg.width;
-    const ih = bgImg.height;
-    const scl = Math.max(CANVAS_W/iw, CANVAS_H/ih);
-    const dw = iw * scl;
-    const dh = ih * scl;
-    const dx = (CANVAS_W - dw) / 2;
-    const dy = (CANVAS_H - dh) / 2;
-    image(bgImg, dx, dy, dw, dh);
+  if (bgImg) {
+    const scl = Math.max(CANVAS_W / bgImg.width, CANVAS_H / bgImg.height);
+    image(bgImg,
+      (CANVAS_W - bgImg.width  * scl) / 2,
+      (CANVAS_H - bgImg.height * scl) / 2,
+      bgImg.width * scl, bgImg.height * scl);
   } else {
-    if(bgColor !== null){
-      background(bgColor);
-    } else {
-      clear();
-    }
+    if (bgColor !== null) background(bgColor);
+    else clear();
   }
-  
-  // Measure all fields
-  const measures = [];
-  for(let i = 0; i < fields.length; i++){
-    const f = fields[i];
+
+  // Measure fields
+  const measures = fields.map(f => {
     const preset = SIZE_PRESETS[f.size || 'M'];
-    
     textFont(fontTimes || 'Times New Roman');
     textSize(preset.text);
-    
-    // Calculate width based on text content
     const txt = f.text || '';
-    const textW = textWidth(txt);
-    const fieldW = Math.min(textW + preset.padX * 2, CONTENT_W);
-    
-    // Wrap text if needed
-    const maxW = CONTENT_W - preset.padX * 2;
-    const lines = wrapText(txt, maxW);
+    const lines = wrapText(txt, CONTENT_W - preset.padX * 2);
+    const w = Math.min(textWidth(txt) + preset.padX * 2, CONTENT_W);
     const h = lines.length * preset.text * 1.2 + preset.padY * 2;
-    
-    measures.push({
-      field: f,
-      lines: lines,
-      w: fieldW,
-      h: h,
-      r: preset.r,
-      tsize: preset.text,
-      padX: preset.padX,
-      padY: preset.padY
-    });
-  }
-  
-  console.log('Measures:', measures);
-  
-  // Arrange fields into rows (horizontal layout with wrapping)
+    return { field: f, lines, w, h, r: preset.r, tsize: preset.text, padX: preset.padX, padY: preset.padY };
+  });
+
+  // Arrange into rows
   const rows = [];
-  let currentRow = [];
-  let currentRowWidth = 0;
-  const GAP = 0; // Gap between fields (set to 0 for no spacing)
-  
-  for(let i = 0; i < measures.length; i++){
-    const item = measures[i];
-    
-    // Check if adding this item would exceed content width
-    if(currentRowWidth + item.w > CONTENT_W && currentRow.length > 0){
-      // Start new row
-      rows.push(currentRow);
-      currentRow = [item];
-      currentRowWidth = item.w;
+  let row = [], rowW = 0;
+  for (const item of measures) {
+    if (rowW + item.w > CONTENT_W && row.length > 0) {
+      rows.push(row); row = [item]; rowW = item.w;
     } else {
-      // Add to current row
-      currentRow.push(item);
-      currentRowWidth += item.w + (currentRow.length > 1 ? GAP : 0);
+      row.push(item); rowW += item.w;
     }
   }
-  
-  // Add last row
-  if(currentRow.length > 0){
-    rows.push(currentRow);
-  }
-  
-  console.log('Rows:', rows);
-  
-  // Calculate total height of all rows
-  let totalH = 0;
-  for(let i = 0; i < rows.length; i++){
-    let rowHeight = 0;
-    for(let j = 0; j < rows[i].length; j++){
-      rowHeight = Math.max(rowHeight, rows[i][j].h);
-    }
-    totalH += rowHeight;
-  }
-  
-  console.log('Total height:', totalH, 'Canvas height:', CANVAS_H);
-  
-  // Draw rows (with padding offset)
+  if (row.length) rows.push(row);
+
+  const totalH = rows.reduce((sum, r) => sum + Math.max(...r.map(i => i.h)), 0);
   let y = CANVAS_PADDING + (CONTENT_H - totalH) / 2;
-  
-  for(let i = 0; i < rows.length; i++){
-    const row = rows[i];
-    
-    // Calculate row width for centering
-    let rowWidth = 0;
-    let rowHeight = 0;
-    for(let j = 0; j < row.length; j++){
-      rowWidth += row[j].w;
-      rowHeight = Math.max(rowHeight, row[j].h);
-      if(j > 0) rowWidth += GAP;
-    }
-    
-    // Start x position (centered with padding)
-    let x = CANVAS_PADDING + (CONTENT_W - rowWidth) / 2;
-    
-    // Draw each field in the row
-    for(let j = 0; j < row.length; j++){
-      const item = row[j];
-      
-      console.log('Drawing field row', i, 'item', j, 'at x:', x, 'y:', y, 'width:', item.w, 'color:', item.field.color);
-      
-      // Draw background
+
+  for (const row of rows) {
+    const rowW  = row.reduce((s, i) => s + i.w, 0);
+    const rowH  = Math.max(...row.map(i => i.h));
+    let x = CANVAS_PADDING + (CONTENT_W - rowW) / 2;
+
+    for (const item of row) {
       noStroke();
       fill(item.field.color || '#FFFFFF');
-      rect(x, y, item.w, item.h, Math.min(item.r, item.h/2));
-      
-      // Add border for white fields
-      if(item.field.color === '#FFFFFF' || item.field.isDefault){
-       noStroke();
-        noFill();
-        rect(x, y, item.w, item.h, Math.min(item.r, item.h/2));
-      }
-      
-      // Draw text
+      rect(x, y, item.w, item.h, Math.min(item.r, item.h / 2));
+
       noStroke();
       fill(0);
       textAlign(CENTER, CENTER);
       textFont(fontTimes || 'Times New Roman');
       textSize(item.tsize);
-      
-      const lineHeight = item.tsize * 0.96;
-      const textBlockH = item.lines.length * lineHeight;
-      const textY = y + (item.h - textBlockH) / 2 + lineHeight / 2 - item.tsize * 0.05;
-      
-      for(let k = 0; k < item.lines.length; k++){
-        text(item.lines[k], x + item.w / 2, textY + k * lineHeight);
-      }
-      
-      x += item.w + GAP;
+
+      const lh = item.tsize * 0.96;
+      const textBlockH = item.lines.length * lh;
+      const ty = y + (item.h - textBlockH) / 2 + lh / 2 - item.tsize * 0.05;
+
+      item.lines.forEach((line, k) => text(line, x + item.w / 2, ty + k * lh));
+      x += item.w;
     }
-    
-    y += rowHeight;
+    y += rowH;
   }
-  
+
   pop();
-  console.log('Drawing complete');
 }
 
-function wrapText(txt, maxWidth){
-  if(!txt) return [''];
-  
+function wrapText(txt, maxWidth) {
+  if (!txt) return [''];
   const words = txt.split(' ');
   const lines = [];
-  let currentLine = '';
-  
-  for(let i = 0; i < words.length; i++){
-    const testLine = currentLine + (currentLine ? ' ' : '') + words[i];
-    const testWidth = textWidth(testLine);
-    
-    if(testWidth > maxWidth && currentLine !== ''){
-      lines.push(currentLine);
-      currentLine = words[i];
-    } else {
-      currentLine = testLine;
-    }
+  let cur = '';
+  for (const word of words) {
+    const test = cur ? cur + ' ' + word : word;
+    if (textWidth(test) > maxWidth && cur) { lines.push(cur); cur = word; }
+    else cur = test;
   }
-  
-  if(currentLine) lines.push(currentLine);
-  
-  return lines.length > 0 ? lines : [''];
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [''];
 }
 
-// ====== UI Functions ======
-function randColor(){ 
-  return PALETTE[Math.floor(Math.random() * PALETTE.length)]; 
-}
-
-function randSize(){ 
-  return ['S','M'][Math.floor(Math.random() * 2)]; 
-}
-
-function addNewField(){
-  const customCount = fields.filter(f => !f.isDefault).length;
-  if(customCount >= 5) {
-    alert('Maximum 5 custom fields allowed');
-    return;
+function wrapTextForGraphics(g, txt, maxWidth) {
+  if (!txt) return [''];
+  const words = txt.split(' ');
+  const lines = [];
+  let cur = '';
+  for (const word of words) {
+    const test = cur ? cur + ' ' + word : word;
+    if (g.textWidth(test) > maxWidth && cur) { lines.push(cur); cur = word; }
+    else cur = test;
   }
-  
-  const obj = {
-    id: Math.random().toString(36).slice(2),
-    text: 'New Field',
-    size: randSize(),
-    color: randColor(),
-    isDefault: false
-  };
-  
-  fields.push(obj);
-  refreshFieldRows();
-  drawContent();
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [''];
 }
 
-function removeField(id){
-  fields = fields.filter(f => f.id !== id);
-  refreshFieldRows();
-  drawContent();
-}
-
-function updateField(id, prop, value){
-  const field = fields.find(f => f.id === id);
-  if(field){
-    if(prop === 'text'){
-      field[prop] = value.slice(0, 50);
-    } else {
-      field[prop] = value;
-    }
-    drawContent();
-  }
-}
-
-function changeFormat(format){
+// ====== Format switch ======
+function changeFormat(format) {
   currentFormat = format;
   CANVAS_W = FORMATS[format].w;
   CANVAS_H = FORMATS[format].h;
-  
-  const maxDisplayW = Math.min(window.innerWidth - 450, 800);
-  const maxDisplayH = window.innerHeight - 200;
-  const scaleW = maxDisplayW / CANVAS_W;
-  const scaleH = maxDisplayH / CANVAS_H;
-  DISPLAY_SCALE = Math.min(scaleW, scaleH, 1);
-  
+  recalcDisplayScale();
   resizeCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
-  
-  document.getElementById('canvasTitle').textContent = 'Canvas ' + FORMATS[format].name;
-  
   drawContent();
 }
 
-function setupUI(){
-  // Format selector
-  document.getElementById('formatSelect').onchange = (e) => {
-    changeFormat(e.target.value);
-  };
-  
-  // Add field button
+// ====== Field helpers ======
+function randColor() { return PALETTE[Math.floor(Math.random() * PALETTE.length)]; }
+function randSize()  { return ['S','M'][Math.floor(Math.random() * 2)]; }
+
+function addNewField() {
+  if (fields.filter(f => !f.isDefault).length >= 5) { alert('Maximum 5 custom fields'); return; }
+  fields.push({ id: Math.random().toString(36).slice(2), text: 'New Field', size: randSize(), color: randColor(), isDefault: false });
+  refreshFieldRows();
+  drawContent();
+}
+
+function removeField(id) { fields = fields.filter(f => f.id !== id); refreshFieldRows(); drawContent(); }
+
+function updateField(id, prop, value) {
+  const f = fields.find(f => f.id === id);
+  if (f) { f[prop] = prop === 'text' ? value.slice(0, 50) : value; drawContent(); }
+}
+
+// ====== UI Setup ======
+function setupUI() {
+  document.getElementById('formatSelect').onchange = e => changeFormat(e.target.value);
   document.getElementById('addField').onclick = addNewField;
-  
-  // Shuffle button
+
   document.getElementById('shuffle').onclick = () => {
-    for(let i = 0; i < fields.length; i++){
-      if(!fields[i].isDefault){
-        fields[i].size = randSize();
-        fields[i].color = randColor();
-      }
-    }
-    refreshFieldRows();
-    drawContent();
+    fields.forEach(f => { if (!f.isDefault) { f.size = randSize(); f.color = randColor(); } });
+    refreshFieldRows(); drawContent();
   };
-  
-  // Background upload
-  document.getElementById('bgFile').onchange = (e) => {
+
+  document.getElementById('bgFile').onchange = e => {
     const file = e.target.files && e.target.files[0];
-    if(!file) return;
+    if (!file) return;
     const url = URL.createObjectURL(file);
-    loadImage(url, (img) => {
-      bgImg = img;
-      bgColor = null;
-      drawContent();
-      URL.revokeObjectURL(url);
-    });
+    loadImage(url, img => { bgImg = img; bgColor = null; drawContent(); URL.revokeObjectURL(url); });
   };
-  
-  // White/Clear background
-  document.getElementById('whiteBg').onclick = () => {
-    bgImg = null;
-    bgColor = 255;
-    drawContent();
-  };
-  
-  document.getElementById('clearBg').onclick = () => {
-    bgImg = null;
-    bgColor = 255;
-    drawContent();
-  };
-  
-  // Download button
+
+  document.getElementById('whiteBg').onclick = () => { bgImg = null; bgColor = 255; drawContent(); };
+  document.getElementById('clearBg').onclick  = () => { bgImg = null; bgColor = 255; drawContent(); };
+
   document.getElementById('download').onclick = () => {
-    const tempCanvas = createGraphics(CANVAS_W, CANVAS_H);
-    tempCanvas.pixelDensity(2);
-    tempCanvas.textFont(fontTimes || 'Times New Roman');
-    
-    // Calculate content area with padding
-    const CONTENT_W = CANVAS_W - CANVAS_PADDING * 2;
-    const CONTENT_H = CANVAS_H - CANVAS_PADDING * 2;
-    
-    // Background
-    if(bgImg){
-      const iw = bgImg.width;
-      const ih = bgImg.height;
-      const scl = Math.max(CANVAS_W/iw, CANVAS_H/ih);
-      const dw = iw * scl;
-      const dh = ih * scl;
-      const dx = (CANVAS_W - dw) / 2;
-      const dy = (CANVAS_H - dh) / 2;
-      tempCanvas.image(bgImg, dx, dy, dw, dh);
+    const g = createGraphics(CANVAS_W, CANVAS_H);
+    g.pixelDensity(2);
+    g.textFont(fontTimes || 'Times New Roman');
+
+    const CW = CANVAS_W - CANVAS_PADDING * 2;
+    const CH = CANVAS_H - CANVAS_PADDING * 2;
+
+    if (bgImg) {
+      const scl = Math.max(CANVAS_W / bgImg.width, CANVAS_H / bgImg.height);
+      g.image(bgImg,
+        (CANVAS_W - bgImg.width  * scl) / 2,
+        (CANVAS_H - bgImg.height * scl) / 2,
+        bgImg.width * scl, bgImg.height * scl);
     } else {
-      if(bgColor !== null){
-        tempCanvas.background(bgColor);
-      } else {
-        tempCanvas.clear();
-      }
+      bgColor !== null ? g.background(bgColor) : g.clear();
     }
-    
-    // Measure fields
-    const measures = [];
-    for(let i = 0; i < fields.length; i++){
-      const f = fields[i];
+
+    const measures = fields.map(f => {
       const preset = SIZE_PRESETS[f.size || 'M'];
-      
-      tempCanvas.textFont(fontTimes || 'Times New Roman');
-      tempCanvas.textSize(preset.text);
-      
-      // Calculate width based on text content
+      g.textFont(fontTimes || 'Times New Roman');
+      g.textSize(preset.text);
       const txt = f.text || '';
-      const textW = tempCanvas.textWidth(txt);
-      const fieldW = Math.min(textW + preset.padX * 2, CONTENT_W);
-      
-      const maxW = CONTENT_W - preset.padX * 2;
-      const lines = wrapTextForGraphics(tempCanvas, txt, maxW);
+      const lines = wrapTextForGraphics(g, txt, CW - preset.padX * 2);
+      const w = Math.min(g.textWidth(txt) + preset.padX * 2, CW);
       const h = lines.length * preset.text * 1.2 + preset.padY * 2;
-      
-      measures.push({
-        field: f,
-        lines: lines,
-        w: fieldW,
-        h: h,
-        r: preset.r,
-        tsize: preset.text
-      });
-    }
-    
-    // Arrange fields into rows (horizontal layout with wrapping)
+      return { field: f, lines, w, h, r: preset.r, tsize: preset.text };
+    });
+
     const rows = [];
-    let currentRow = [];
-    let currentRowWidth = 0;
-    const GAP = 0; // Gap between fields
-    
-    for(let i = 0; i < measures.length; i++){
-      const item = measures[i];
-      
-      // Check if adding this item would exceed content width
-      if(currentRowWidth + item.w > CONTENT_W && currentRow.length > 0){
-        // Start new row
-        rows.push(currentRow);
-        currentRow = [item];
-        currentRowWidth = item.w;
-      } else {
-        // Add to current row
-        currentRow.push(item);
-        currentRowWidth += item.w + (currentRow.length > 1 ? GAP : 0);
-      }
+    let row = [], rowW = 0;
+    for (const item of measures) {
+      if (rowW + item.w > CW && row.length > 0) { rows.push(row); row = [item]; rowW = item.w; }
+      else { row.push(item); rowW += item.w; }
     }
-    
-    // Add last row
-    if(currentRow.length > 0){
-      rows.push(currentRow);
-    }
-    
-    // Calculate total height of all rows
-    let totalH = 0;
-    for(let i = 0; i < rows.length; i++){
-      let rowHeight = 0;
-      for(let j = 0; j < rows[i].length; j++){
-        rowHeight = Math.max(rowHeight, rows[i][j].h);
+    if (row.length) rows.push(row);
+
+    const totalH = rows.reduce((s, r) => s + Math.max(...r.map(i => i.h)), 0);
+    let y = CANVAS_PADDING + (CH - totalH) / 2;
+
+    for (const row of rows) {
+      const rowW = row.reduce((s, i) => s + i.w, 0);
+      const rowH = Math.max(...row.map(i => i.h));
+      let x = CANVAS_PADDING + (CW - rowW) / 2;
+
+      for (const item of row) {
+        g.noStroke();
+        g.fill(item.field.color || '#FFFFFF');
+        g.rect(x, y, item.w, item.h, Math.min(item.r, item.h / 2));
+
+        g.noStroke();
+        g.fill(0);
+        g.textAlign(CENTER, CENTER);
+        g.textFont(fontTimes || 'Times New Roman');
+        g.textSize(item.tsize);
+
+        const lh = item.tsize * 1.2;
+        const tbH = item.lines.length * lh;
+        const ty = y + (item.h - tbH) / 2 + lh / 2 - item.tsize * 0.05;
+        item.lines.forEach((line, k) => g.text(line, x + item.w / 2, ty + k * lh));
+        x += item.w;
       }
-      totalH += rowHeight;
+      y += rowH;
     }
-    
-    // Draw rows (with padding offset)
-    let y = CANVAS_PADDING + (CONTENT_H - totalH) / 2;
-    
-    for(let i = 0; i < rows.length; i++){
-      const row = rows[i];
-      
-      // Calculate row width for centering
-      let rowWidth = 0;
-      let rowHeight = 0;
-      for(let j = 0; j < row.length; j++){
-        rowWidth += row[j].w;
-        rowHeight = Math.max(rowHeight, row[j].h);
-        if(j > 0) rowWidth += GAP;
-      }
-      
-      // Start x position (centered with padding)
-      let x = CANVAS_PADDING + (CONTENT_W - rowWidth) / 2;
-      
-      // Draw each field in the row
-      for(let j = 0; j < row.length; j++){
-        const item = row[j];
-        
-        tempCanvas.noStroke();
-        tempCanvas.fill(item.field.color || '#FFFFFF');
-        tempCanvas.rect(x, y, item.w, item.h, Math.min(item.r, item.h/2));
-        
-        if(item.field.color === '#FFFFFF' || item.field.isDefault){
-          tempCanvas.noStroke();
-          tempCanvas.noFill();
-          tempCanvas.rect(x, y, item.w, item.h, Math.min(item.r, item.h/2));
-        }
-        
-        tempCanvas.noStroke();
-        tempCanvas.fill(0);
-        tempCanvas.textAlign(CENTER, CENTER);
-        tempCanvas.textFont(fontTimes || 'Times New Roman');
-        tempCanvas.textSize(item.tsize);
-        
-        const lineHeight = item.tsize * 1.2;
-        const textBlockH = item.lines.length * lineHeight;
-        const textY = y + (item.h - textBlockH) / 2 + lineHeight / 2 - item.tsize * 0.05;
-        
-        for(let k = 0; k < item.lines.length; k++){
-          tempCanvas.text(item.lines[k], x + item.w / 2, textY + k * lineHeight);
-        }
-        
-        x += item.w + GAP;
-      }
-      
-      y += rowHeight;
-    }
-    
-    const ts = new Date().toISOString().slice(0,10);
-    const formatName = currentFormat;
-    save(tempCanvas, `social-media-${formatName}-${ts}.png`);
+
+    const ts = new Date().toISOString().slice(0, 10);
+    save(g, `social-media-${currentFormat}-${ts}.png`);
   };
 }
 
-function wrapTextForGraphics(g, txt, maxWidth){
-  if(!txt) return [''];
-  
-  const words = txt.split(' ');
-  const lines = [];
-  let currentLine = '';
-  
-  for(let i = 0; i < words.length; i++){
-    const testLine = currentLine + (currentLine ? ' ' : '') + words[i];
-    const testWidth = g.textWidth(testLine);
-    
-    if(testWidth > maxWidth && currentLine !== ''){
-      lines.push(currentLine);
-      currentLine = words[i];
-    } else {
-      currentLine = testLine;
-    }
-  }
-  
-  if(currentLine) lines.push(currentLine);
-  
-  return lines.length > 0 ? lines : [''];
-}
-
-function renderFieldRow(f){
+// ====== Field UI ======
+function renderFieldRow(f) {
   const container = document.getElementById('fields');
   const el = document.createElement('div');
   el.className = f.isDefault ? 'field default' : 'field';
   el.dataset.id = f.id;
 
-  // Header
   const head = document.createElement('div');
   head.className = 'fieldHead';
   const title = document.createElement('strong');
   title.textContent = f.isDefault ? 'Default Field (White, Size L)' : 'Custom Field';
   head.appendChild(title);
-  
-  if(!f.isDefault){
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn small';
-    removeBtn.textContent = 'Remove';
-    head.appendChild(removeBtn);
-    removeBtn.onclick = () => removeField(f.id);
+
+  if (!f.isDefault) {
+    const btn = document.createElement('button');
+    btn.className = 'btn small'; btn.textContent = 'Remove';
+    btn.onclick = () => removeField(f.id);
+    head.appendChild(btn);
   }
 
-  // Text input
-  const row1 = document.createElement('div');
-  row1.className = 'row';
-  const lab1 = document.createElement('label');
-  lab1.textContent = 'Text';
-  const textInput = document.createElement('input');
-  textInput.type = 'text';
-  textInput.maxLength = 50;
-  textInput.value = f.text || '';
-  textInput.placeholder = 'Enter text (max 50)';
-  row1.appendChild(lab1);
-  row1.appendChild(textInput);
-  textInput.oninput = (e) => updateField(f.id, 'text', e.target.value);
+  const row1 = document.createElement('div'); row1.className = 'row';
+  const lab1 = document.createElement('label'); lab1.textContent = 'Text';
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.maxLength = 50; inp.value = f.text || '';
+  inp.placeholder = 'Enter text (max 50)';
+  inp.oninput = e => updateField(f.id, 'text', e.target.value);
+  row1.appendChild(lab1); row1.appendChild(inp);
 
   el.appendChild(head);
   el.appendChild(row1);
 
-  // Color and size for custom fields only
-  if(!f.isDefault){
-    const row2 = document.createElement('div');
-    row2.className = 'row';
-    
-    const lab2 = document.createElement('label');
-    lab2.textContent = 'Color';
+  if (!f.isDefault) {
+    const row2 = document.createElement('div'); row2.className = 'row';
+
+    const lab2 = document.createElement('label'); lab2.textContent = 'Color';
     const colorSel = document.createElement('select');
-    for(let i = 0; i < PALETTE.length; i++){
-      const c = PALETTE[i];
-      const opt = document.createElement('option');
-      opt.value = c;
-      opt.textContent = c.replace('#','');
-      if(f.color === c) opt.selected = true;
-      colorSel.appendChild(opt);
-    }
-    
-    const lab3 = document.createElement('label');
-    lab3.style.minWidth = '36px';
-    lab3.style.textAlign = 'right';
-    lab3.textContent = 'Size';
-    const sizeSel = document.createElement('select');
-    const sizes = ['S','M'];
-    for(let i = 0; i < sizes.length; i++){
-      const s = sizes[i];
+    PALETTE.forEach(c => {
       const o = document.createElement('option');
-      o.value = s;
-      o.textContent = s;
-      if(f.size === s) o.selected = true;
+      o.value = c; o.textContent = c.replace('#','');
+      if (f.color === c) o.selected = true;
+      colorSel.appendChild(o);
+    });
+    colorSel.onchange = e => updateField(f.id, 'color', e.target.value);
+
+    const lab3 = document.createElement('label');
+    lab3.style.cssText = 'min-width:36px;text-align:right'; lab3.textContent = 'Size';
+    const sizeSel = document.createElement('select');
+    ['S','M'].forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      if (f.size === s) o.selected = true;
       sizeSel.appendChild(o);
-    }
-    
-    row2.appendChild(lab2);
-    row2.appendChild(colorSel);
-    row2.appendChild(lab3);
-    row2.appendChild(sizeSel);
+    });
+    sizeSel.onchange = e => updateField(f.id, 'size', e.target.value);
+
+    row2.appendChild(lab2); row2.appendChild(colorSel);
+    row2.appendChild(lab3); row2.appendChild(sizeSel);
     el.appendChild(row2);
-    
-    colorSel.onchange = (e) => updateField(f.id, 'color', e.target.value);
-    sizeSel.onchange = (e) => updateField(f.id, 'size', e.target.value);
   }
 
   container.appendChild(el);
 }
 
-function refreshFieldRows(){
-  const container = document.getElementById('fields');
-  container.innerHTML = '';
-  for(let i = 0; i < fields.length; i++){
-    renderFieldRow(fields[i]);
-  }
+function refreshFieldRows() {
+  document.getElementById('fields').innerHTML = '';
+  fields.forEach(renderFieldRow);
 }
 </script>
 </body>

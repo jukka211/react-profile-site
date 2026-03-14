@@ -242,7 +242,7 @@ function setup() {
 
   const cnv = createCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
   cnv.parent('canvas-holder');
-  pixelDensity(2);
+  pixelDensity(3);
 
   if (fontTimes) textFont(fontTimes);
   else textFont('Times New Roman');
@@ -424,7 +424,7 @@ function setupUI() {
 
   document.getElementById('download').onclick = () => {
     const g = createGraphics(CANVAS_W, CANVAS_H);
-    g.pixelDensity(2);
+    g.pixelDensity(3);
     g.textFont(fontTimes || 'Times New Roman');
 
     const CW = CANVAS_W - CANVAS_PADDING * 2;

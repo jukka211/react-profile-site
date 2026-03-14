@@ -14,15 +14,23 @@
     }
     * { box-sizing: border-box; font-family: 'Times New Roman', Times, serif; }
     body { margin: 0; background: var(--bg); color: #000; }
+header {
+  position: sticky;
+  top: 0;
+  padding: 14px 18px;
+  background: #fff;
+  box-shadow: var(--ui-shadow);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    header {
-      position: sticky; top: 0;
-      padding: 14px 18px;
-      background: #fff;
-      box-shadow: var(--ui-shadow);
-      z-index: 10;
-    }
-    header h1 { margin: 0; font-size: 18px; }
+.header-logo {
+  display: block;
+  max-height: 36px;
+  width: auto;
+}
 
     /* ── Layout ── */
     .wrap {
@@ -125,7 +133,9 @@
 </head>
 <body>
 
-<header><h1>Social Media Tool</h1></header>
+<header>
+  <img src="s-r.svg" alt="Social Media Tool" class="header-logo" />
+</header>
 
 <div class="wrap">
   <section class="panel" id="controls">

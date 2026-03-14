@@ -8,72 +8,122 @@
   <style>
     :root {
       --accent: #111;
-      --bg: #f0f0f0;
+      --bg: #ffffff;
       --panel: #ffffff;
-      --ui-shadow: 0px 0px 3px rgba(0,0,0,0.2);
+      --ui-shadow: 0px 0px 1px rgba(0,0,0,0.8);
+      --header-h: 64px;
     }
     * { box-sizing: border-box; font-family: 'Times New Roman', Times, serif; }
-    body { margin: 0; background: var(--bg); color: #000; }
-header {
-  position: sticky;
-  top: 0;
-  padding: 14px 18px;
-  background: #fff;
-  box-shadow: var(--ui-shadow);
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: #000;
+      height: 100%;
+      overflow: hidden; /* prevent body scroll — each zone scrolls independently */
+    }
 
-.header-logo {
-  display: block;
-  max-height: 36px;
-  width: auto;
-}
+    /* ── Header ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      padding: 14px 18px;
+      background: #fff;
+      box-shadow: var(--ui-shadow);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .header-logo {
+      display: block;
+      max-height: 36px;
+      width: auto;
+    }
 
-    /* ── Layout ── */
+    /* ── Main wrapper — fills the space below the header ── */
     .wrap {
+      position: fixed;
+      top: var(--header-h);
+      left: 0; right: 0; bottom: 0;
       display: grid;
       grid-template-columns: 360px 1fr;
       gap: 18px;
-      padding: 18px;
-      max-width: 1500px;
+      padding: 14px;
+      max-width: 90vw;
       margin: 0 auto;
+      /* center in very wide viewports */
+      width: 100%;
     }
     @media (max-width: 1100px) { .wrap { grid-template-columns: 300px 1fr; } }
 
-    /* Mobile: canvas top, controls below */
+    /* Mobile */
     @media (max-width: 680px) {
+      html, body { overflow: auto; }
       .wrap {
+        position: static;
         grid-template-columns: 1fr;
-        padding: 10px;
+        padding: 0px;
         gap: 12px;
+        max-width: 100vw;
       }
       .wrap > section:last-child { order: -1; }
       .row .btn.primary { flex: 1; text-align: center; }
     }
 
-    /* ── Panel ── */
+    /* ── Control panel — scrollable, full height ── */
     .panel {
       background: var(--panel);
-      box-shadow: var(--ui-shadow);
+
       border-radius: 12px;
       padding: 16px;
+      /* Fill column height, scroll internally */
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
-    .panel h2 { margin: 0 0 10px; font-size: 20px; color: #333; font-weight: 400; }
+    .panel h2 { margin: 0 0 10px; font-size: 24px; color: #333; font-weight: 400; }
 
-    /* ── Row ── */
+    /* ── Canvas column — fills height, centres the canvas ── */
+    #canvas-col {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      /* no background / shadow — just a layout container */
+      border-radius: 12px;
+     
+    }
+
+    /* Canvas element itself */
+    #canvas-holder {
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+    #canvas-holder canvas {
+      display: block;
+      border-radius: 12px;
+      box-shadow: var(--ui-shadow);
+      background: #ffffff;
+      /* p5 sets width/height attributes; we must NOT override them with CSS
+         so the canvas renders at exactly CANVAS_W*DS × CANVAS_H*DS pixels  */
+    }
+
+    /* ── Row / input styles (unchanged) ── */
     .row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
     .row > * { min-width: 0; }
-    .row label { font-size: 12px; color: #555; min-width: 72px; flex-shrink: 0; }
+    .row label { font-size: 16px; color: #555; min-width: 72px; flex-shrink: 0; }
 
     @media (max-width: 360px) {
       .row { flex-direction: column; align-items: flex-start; }
       .row label { min-width: 0; }
     }
 
-    /* ── Inputs ── */
     input[type=text], select, input[type=file] {
       flex: 1;
       padding: 10px 12px;
@@ -81,13 +131,11 @@ header {
       border: 0; outline: 0;
       border-radius: 10px;
       background: #fff;
-      font-size: 14px;
+      font-size: 16px;
       min-width: 0;
     }
-    select { max-width: 160px; }
     input[type="file"] { flex: 1 1 auto; max-width: 100%; overflow: hidden; }
 
-    /* ── Buttons ── */
     .btn {
       appearance: none; -webkit-appearance: none;
       outline: 0; border: 0;
@@ -97,38 +145,20 @@ header {
       border-radius: 12px;
       cursor: pointer;
       white-space: nowrap;
-      font-size: 14px;
+      font-size: 16px;
     }
-    .btn.primary { background: #111; color: #fff; }
+    .btn.primary { background: #FFE500; color: #000; width: 100%; }
     .btn:focus-visible { box-shadow: var(--ui-shadow); outline: 0; }
     .btn:focus, .btn:active { outline: 0; border: 0; }
-    .btn.small { font-size: 12px; padding: 6px 10px; }
+    .btn.small { font-size: 16px; padding: 6px 10px; }
 
-    /* ── Fields ── */
     .grid { display: grid; gap: 10px; }
     .field { box-shadow: var(--ui-shadow); border-radius: 12px; padding: 10px; }
     .field.default { box-shadow: var(--ui-shadow); background: #ffffff; }
     .fieldHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .fieldHead strong { font-size: 13px; font-weight: 400; }
+    .fieldHead strong { font-size: 16px; font-weight: 400; }
 
-    /* ── Canvas ── */
-    #canvas-holder {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-    #canvas-holder canvas {
-      display: block;
-      border-radius: 12px;
-      box-shadow: var(--ui-shadow);
-      background: #ffffff;
-      /* let p5 control dimensions; CSS scales visually */
-      max-width: 100%;
-      height: auto !important;
-      width: auto !important;
-    }
-
-    .divider { height: 0; border: 0; box-shadow: var(--ui-shadow); margin: 16px 0; }
+    .divider { height: 0; border: 0; margin: 16px 0; border-bottom: #eeeeee 1px solid; }
   </style>
 </head>
 <body>
@@ -138,10 +168,10 @@ header {
 </header>
 
 <div class="wrap">
+  <!-- Left: controls -->
   <section class="panel" id="controls">
     <h2>Format</h2>
     <div class="row">
-      <label>Format</label>
       <select id="formatSelect">
         <option value="post" selected>Post (1080×1350)</option>
         <option value="story">Story (1080×1920)</option>
@@ -152,8 +182,8 @@ header {
 
     <h2>Content</h2>
     <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:14px">
-      <span style="font-size:12px;color:#777">1 default field + max 5 custom fields</span>
-      <button id="addField" class="btn">+ Add field</button>
+      <span style="font-size:16px;">1 default field + max 5 custom fields</span>
+      <button id="addField" class="btn" style="background-color:#FFE500;color:#000;">+ Add field</button>
     </div>
     <div id="fields" class="grid"></div>
 
@@ -173,23 +203,31 @@ header {
       <button id="whiteBg" class="btn">White BG</button>
       <button id="clearBg" class="btn">Clear</button>
     </div>
+
+    <h2>Export</h2>
     <div class="row">
-      <label>Export</label>
       <button id="download" class="btn primary">Download PNG</button>
     </div>
   </section>
 
-  <section class="panel" style="box-shadow:none;padding:0;">
+  <!-- Right: canvas -->
+  <section id="canvas-col">
     <div id="canvas-holder"></div>
   </section>
 </div>
 
 <script>
 // ====== Configuration ======
+// Logical canvas dimensions (used for preview scaling & layout math)
 const FORMATS = {
   post:  { w: 1080, h: 1350 },
   story: { w: 1080, h: 1920 }
 };
+
+// Export pixel dimensions (pixelDensity × logical size)
+// Post:  1080 × 3 = 3240 wide, 1350 × 3 = 4050 tall
+// Story: 1080 × 3 = 3240 wide, 1920 × 3 = 5760 tall
+const EXPORT_PIXEL_DENSITY = 3;
 
 let currentFormat = 'post';
 let CANVAS_W = 1080;
@@ -210,22 +248,26 @@ let fields = [];
 let bgImg = null;
 let bgColor = 255;
 
-// ====== Scale helper ======
+// ====== Display scale — fit canvas inside its column ======
 function recalcDisplayScale() {
   const isMobile = window.innerWidth <= 680;
-  let maxW, maxH;
+
+  let availW, availH;
 
   if (isMobile) {
-    maxW = window.innerWidth - 20;
-    maxH = window.innerHeight * 0.65;
+    availW = window.innerWidth - 20;
+    availH = window.innerHeight * 0.65;
   } else {
-    const panelW = window.innerWidth <= 1100 ? 300 : 360;
-    maxW = Math.min(window.innerWidth - panelW - 54, 800);
-    maxH = window.innerHeight - 120;
+    const HEADER_H = 64;
+    const GAP      = 18;
+    const PADDING  = 18;
+    const panelW   = (window.innerWidth <= 1100 ? 300 : 360) + GAP;
+    availW = window.innerWidth  - panelW - PADDING * 2 - GAP;
+    availH = window.innerHeight - HEADER_H - PADDING * 2;
   }
 
-  const scaleW = maxW / CANVAS_W;
-  const scaleH = maxH / CANVAS_H;
+  const scaleW = availW / CANVAS_W;
+  const scaleH = availH / CANVAS_H;
   DISPLAY_SCALE = Math.min(scaleW, scaleH, 1);
 }
 
@@ -242,6 +284,8 @@ function setup() {
 
   const cnv = createCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
   cnv.parent('canvas-holder');
+  // Display canvas uses density 1 — the DISPLAY_SCALE already handles sizing.
+  // Export uses its own graphics buffer with EXPORT_PIXEL_DENSITY.
   pixelDensity(3);
 
   if (fontTimes) textFont(fontTimes);
@@ -260,7 +304,6 @@ function setup() {
   background(255);
   drawContent();
 
-  // Handle resize / orientation change
   window.addEventListener('resize', () => {
     recalcDisplayScale();
     resizeCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
@@ -270,34 +313,65 @@ function setup() {
 
 function draw() { /* intentionally empty */ }
 
-// ====== Drawing ======
+// ====== Drawing (preview) ======
 function drawContent() {
   push();
   scale(DISPLAY_SCALE);
+  _renderScene(
+    window,    // use global p5 functions
+    CANVAS_W,
+    CANVAS_H,
+    CANVAS_PADDING,
+    bgImg,
+    bgColor,
+    fields,
+    fontTimes
+  );
+  pop();
+}
 
-  const CONTENT_W = CANVAS_W - CANVAS_PADDING * 2;
-  const CONTENT_H = CANVAS_H - CANVAS_PADDING * 2;
+// ====== Shared render logic ======
+// Works for both the preview canvas (global p5) and export graphics buffer.
+// `ctx` is either the global p5 instance (window) or a p5.Graphics object.
+function _renderScene(ctx, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
+  const isGlobal = (ctx === window);
+
+  // Helper shims so we can call ctx.background() or background() uniformly
+  const bg      = isGlobal ? (v)       => background(v)          : (v)       => ctx.background(v);
+  const clr     = isGlobal ? ()        => clear()                : ()        => ctx.clear();
+  const img_    = isGlobal ? (...a)    => image(...a)            : (...a)    => ctx.image(...a);
+  const noStr   = isGlobal ? ()        => noStroke()             : ()        => ctx.noStroke();
+  const fill_   = isGlobal ? (v)       => fill(v)               : (v)       => ctx.fill(v);
+  const rect_   = isGlobal ? (...a)    => rect(...a)            : (...a)    => ctx.rect(...a);
+  const tAlign  = isGlobal ? (h, v)    => textAlign(h, v)       : (h, v)    => ctx.textAlign(h, v);
+  const tFont   = isGlobal ? (f)       => textFont(f)           : (f)       => ctx.textFont(f);
+  const tSize   = isGlobal ? (s)       => textSize(s)           : (s)       => ctx.textSize(s);
+  const tWidth  = isGlobal ? (s)       => textWidth(s)          : (s)       => ctx.textWidth(s);
+  const txt_    = isGlobal ? (...a)    => text(...a)            : (...a)    => ctx.text(...a);
+
+  const CONTENT_W = CW - PAD * 2;
+  const CONTENT_H = CH - PAD * 2;
 
   // Background
-  if (bgImg) {
-    const scl = Math.max(CANVAS_W / bgImg.width, CANVAS_H / bgImg.height);
-    image(bgImg,
-      (CANVAS_W - bgImg.width  * scl) / 2,
-      (CANVAS_H - bgImg.height * scl) / 2,
-      bgImg.width * scl, bgImg.height * scl);
+  if (_bgImg) {
+    const scl = Math.max(CW / _bgImg.width, CH / _bgImg.height);
+    img_(_bgImg,
+      (CW - _bgImg.width  * scl) / 2,
+      (CH - _bgImg.height * scl) / 2,
+      _bgImg.width * scl, _bgImg.height * scl);
   } else {
-    if (bgColor !== null) background(bgColor);
-    else clear();
+    if (_bgColor !== null) bg(_bgColor);
+    else clr();
   }
 
   // Measure fields
-  const measures = fields.map(f => {
+  const measures = _fields.map(f => {
     const preset = SIZE_PRESETS[f.size || 'M'];
-    textFont(fontTimes || 'Times New Roman');
-    textSize(preset.text);
+    tFont(font || 'Times New Roman');
+    tSize(preset.text);
     const txt = f.text || '';
-    const lines = wrapText(txt, CONTENT_W - preset.padX * 2);
-    const w = Math.min(textWidth(txt) + preset.padX * 2, CONTENT_W);
+    const lines = _wrapText(tWidth, txt, CONTENT_W - preset.padX * 2);
+    const w = Math.min(tWidth(txt) + preset.padX * 2, CONTENT_W);
     const h = lines.length * preset.text * 1.2 + preset.padY * 2;
     return { field: f, lines, w, h, r: preset.r, tsize: preset.text, padX: preset.padX, padY: preset.padY };
   });
@@ -315,59 +389,43 @@ function drawContent() {
   if (row.length) rows.push(row);
 
   const totalH = rows.reduce((sum, r) => sum + Math.max(...r.map(i => i.h)), 0);
-  let y = CANVAS_PADDING + (CONTENT_H - totalH) / 2;
+  let y = PAD + (CONTENT_H - totalH) / 2;
 
   for (const row of rows) {
-    const rowW  = row.reduce((s, i) => s + i.w, 0);
-    const rowH  = Math.max(...row.map(i => i.h));
-    let x = CANVAS_PADDING + (CONTENT_W - rowW) / 2;
+    const rW  = row.reduce((s, i) => s + i.w, 0);
+    const rH  = Math.max(...row.map(i => i.h));
+    let x = PAD + (CONTENT_W - rW) / 2;
 
     for (const item of row) {
-      noStroke();
-      fill(item.field.color || '#FFFFFF');
-      rect(x, y, item.w, item.h, Math.min(item.r, item.h / 2));
+      noStr();
+      fill_(item.field.color || '#FFFFFF');
+      rect_(x, y, item.w, item.h, Math.min(item.r, item.h / 2));
 
-      noStroke();
-      fill(0);
-      textAlign(CENTER, CENTER);
-      textFont(fontTimes || 'Times New Roman');
-      textSize(item.tsize);
+      noStr();
+      fill_(0);
+      tAlign(CENTER, CENTER);
+      tFont(font || 'Times New Roman');
+      tSize(item.tsize);
 
       const lh = item.tsize * 0.96;
       const textBlockH = item.lines.length * lh;
       const ty = y + (item.h - textBlockH) / 2 + lh / 2 - item.tsize * 0.05;
 
-      item.lines.forEach((line, k) => text(line, x + item.w / 2, ty + k * lh));
+      item.lines.forEach((line, k) => txt_(line, x + item.w / 2, ty + k * lh));
       x += item.w;
     }
-    y += rowH;
+    y += rH;
   }
-
-  pop();
 }
 
-function wrapText(txt, maxWidth) {
+function _wrapText(twFn, txt, maxWidth) {
   if (!txt) return [''];
   const words = txt.split(' ');
   const lines = [];
   let cur = '';
   for (const word of words) {
     const test = cur ? cur + ' ' + word : word;
-    if (textWidth(test) > maxWidth && cur) { lines.push(cur); cur = word; }
-    else cur = test;
-  }
-  if (cur) lines.push(cur);
-  return lines.length ? lines : [''];
-}
-
-function wrapTextForGraphics(g, txt, maxWidth) {
-  if (!txt) return [''];
-  const words = txt.split(' ');
-  const lines = [];
-  let cur = '';
-  for (const word of words) {
-    const test = cur ? cur + ' ' + word : word;
-    if (g.textWidth(test) > maxWidth && cur) { lines.push(cur); cur = word; }
+    if (twFn(test) > maxWidth && cur) { lines.push(cur); cur = word; }
     else cur = test;
   }
   if (cur) lines.push(cur);
@@ -422,74 +480,89 @@ function setupUI() {
   document.getElementById('whiteBg').onclick = () => { bgImg = null; bgColor = 255; drawContent(); };
   document.getElementById('clearBg').onclick  = () => { bgImg = null; bgColor = 255; drawContent(); };
 
+  // ── Export at full pixel density ──────────────────────────────────────────
+  // Post:  pixelDensity(3) × 1080×1350  → 3240 × 4050 px
+  // Story: pixelDensity(3) × 1080×1920  → 3240 × 5760 px
   document.getElementById('download').onclick = () => {
     const g = createGraphics(CANVAS_W, CANVAS_H);
-    g.pixelDensity(3);
+    g.pixelDensity(EXPORT_PIXEL_DENSITY);
     g.textFont(fontTimes || 'Times New Roman');
 
-    const CW = CANVAS_W - CANVAS_PADDING * 2;
-    const CH = CANVAS_H - CANVAS_PADDING * 2;
-
-    if (bgImg) {
-      const scl = Math.max(CANVAS_W / bgImg.width, CANVAS_H / bgImg.height);
-      g.image(bgImg,
-        (CANVAS_W - bgImg.width  * scl) / 2,
-        (CANVAS_H - bgImg.height * scl) / 2,
-        bgImg.width * scl, bgImg.height * scl);
-    } else {
-      bgColor !== null ? g.background(bgColor) : g.clear();
-    }
-
-    const measures = fields.map(f => {
-      const preset = SIZE_PRESETS[f.size || 'M'];
-      g.textFont(fontTimes || 'Times New Roman');
-      g.textSize(preset.text);
-      const txt = f.text || '';
-      const lines = wrapTextForGraphics(g, txt, CW - preset.padX * 2);
-      const w = Math.min(g.textWidth(txt) + preset.padX * 2, CW);
-      const h = lines.length * preset.text * 1.2 + preset.padY * 2;
-      return { field: f, lines, w, h, r: preset.r, tsize: preset.text };
-    });
-
-    const rows = [];
-    let row = [], rowW = 0;
-    for (const item of measures) {
-      if (rowW + item.w > CW && row.length > 0) { rows.push(row); row = [item]; rowW = item.w; }
-      else { row.push(item); rowW += item.w; }
-    }
-    if (row.length) rows.push(row);
-
-    const totalH = rows.reduce((s, r) => s + Math.max(...r.map(i => i.h)), 0);
-    let y = CANVAS_PADDING + (CH - totalH) / 2;
-
-    for (const row of rows) {
-      const rowW = row.reduce((s, i) => s + i.w, 0);
-      const rowH = Math.max(...row.map(i => i.h));
-      let x = CANVAS_PADDING + (CW - rowW) / 2;
-
-      for (const item of row) {
-        g.noStroke();
-        g.fill(item.field.color || '#FFFFFF');
-        g.rect(x, y, item.w, item.h, Math.min(item.r, item.h / 2));
-
-        g.noStroke();
-        g.fill(0);
-        g.textAlign(CENTER, CENTER);
-        g.textFont(fontTimes || 'Times New Roman');
-        g.textSize(item.tsize);
-
-        const lh = item.tsize * 1.2;
-        const tbH = item.lines.length * lh;
-        const ty = y + (item.h - tbH) / 2 + lh / 2 - item.tsize * 0.05;
-        item.lines.forEach((line, k) => g.text(line, x + item.w / 2, ty + k * lh));
-        x += item.w;
-      }
-      y += rowH;
-    }
+    // Render into the off-screen buffer using graphics methods directly
+    _renderSceneGraphics(g, CANVAS_W, CANVAS_H, CANVAS_PADDING, bgImg, bgColor, fields, fontTimes);
 
     const ts = new Date().toISOString().slice(0, 10);
     save(g, `social-media-${currentFormat}-${ts}.png`);
+    g.remove();
   };
+}
+
+// ====== Graphics-buffer render (export) ======
+// Uses g.xxx() methods throughout — no global p5 calls.
+function _renderSceneGraphics(g, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
+  const CONTENT_W = CW - PAD * 2;
+  const CONTENT_H = CH - PAD * 2;
+
+  if (_bgImg) {
+    const scl = Math.max(CW / _bgImg.width, CH / _bgImg.height);
+    g.image(_bgImg,
+      (CW - _bgImg.width  * scl) / 2,
+      (CH - _bgImg.height * scl) / 2,
+      _bgImg.width * scl, _bgImg.height * scl);
+  } else {
+    if (_bgColor !== null) g.background(_bgColor);
+    else g.clear();
+  }
+
+  const measures = _fields.map(f => {
+    const preset = SIZE_PRESETS[f.size || 'M'];
+    g.textFont(font || 'Times New Roman');
+    g.textSize(preset.text);
+    const txt = f.text || '';
+    const lines = _wrapText(s => g.textWidth(s), txt, CONTENT_W - preset.padX * 2);
+    const w = Math.min(g.textWidth(txt) + preset.padX * 2, CONTENT_W);
+    const h = lines.length * preset.text * 1.2 + preset.padY * 2;
+    return { field: f, lines, w, h, r: preset.r, tsize: preset.text, padX: preset.padX, padY: preset.padY };
+  });
+
+  const rows = [];
+  let row = [], rowW = 0;
+  for (const item of measures) {
+    if (rowW + item.w > CONTENT_W && row.length > 0) {
+      rows.push(row); row = [item]; rowW = item.w;
+    } else {
+      row.push(item); rowW += item.w;
+    }
+  }
+  if (row.length) rows.push(row);
+
+  const totalH = rows.reduce((sum, r) => sum + Math.max(...r.map(i => i.h)), 0);
+  let y = PAD + (CONTENT_H - totalH) / 2;
+
+  for (const row of rows) {
+    const rW = row.reduce((s, i) => s + i.w, 0);
+    const rH = Math.max(...row.map(i => i.h));
+    let x = PAD + (CONTENT_W - rW) / 2;
+
+    for (const item of row) {
+      g.noStroke();
+      g.fill(item.field.color || '#FFFFFF');
+      g.rect(x, y, item.w, item.h, Math.min(item.r, item.h / 2));
+
+      g.noStroke();
+      g.fill(0);
+      g.textAlign(CENTER, CENTER);
+      g.textFont(font || 'Times New Roman');
+      g.textSize(item.tsize);
+
+      const lh = item.tsize * 1.2;
+      const tbH = item.lines.length * lh;
+      const ty = y + (item.h - tbH) / 2 + lh / 2 - item.tsize * 0.05;
+      item.lines.forEach((line, k) => g.text(line, x + item.w / 2, ty + k * lh));
+      x += item.w;
+    }
+    y += rH;
+  }
 }
 
 // ====== Field UI ======

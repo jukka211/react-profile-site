@@ -24,33 +24,34 @@
 
     /* ── Header ── */
     header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--header-h);
-      padding: 14px 18px;
+
+      height: auto;
+      padding: 0;
+      padding-bottom: 20px;
       background: #fff;
       box-shadow: var(--ui-shadow);
       z-index: 10;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      justify-content: top;
+      align-items: top;
     }
     .header-logo {
       display: block;
-      max-height: 36px;
+      height: 40px;
       width: auto;
+      padding-bottom: 16px;
     }
 
     /* ── Main wrapper — fills the space below the header ── */
     .wrap {
       position: fixed;
-      top: var(--header-h);
+      top: 0;
       left: 0; right: 0; bottom: 0;
       display: grid;
       grid-template-columns: 360px 1fr;
       gap: 18px;
       padding: 14px;
-      max-width: 90vw;
+      max-width: 100vw;
       margin: 0 auto;
       /* center in very wide viewports */
       width: 100%;
@@ -60,8 +61,40 @@
     /* Mobile */
     @media (max-width: 680px) {
       html, body { overflow: auto; }
+      header {
+        --mobile-header-h: 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        height: auto;
+        min-height: var(--mobile-header-h);
+        padding: 10px !important;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+      }
+
+      .header-logo {
+        height: 40px;
+        width: auto;
+        padding-bottom: 0;
+        margin: 0 auto;
+      }
+
+      #controls > header .header-logo {
+        width: auto !important;
+        max-width: none !important;
+        height: 40px !important;
+        max-height: 40px !important;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+
       .wrap {
-        margin-top: 10vh;
+        margin-top: 60px;
         position: static;
         grid-template-columns: 1fr;
         padding: 0px;
@@ -77,7 +110,7 @@
       background: var(--panel);
 
       border-radius: 12px;
-      padding: 16px;
+      padding: 4px;
       /* Fill column height, scroll internally */
       height: 100%;
       overflow-y: auto;
@@ -136,7 +169,7 @@
       font-size: 16px;
       min-width: 0;
     }
-    input[type="file"] { flex: 1 1 auto; max-width: 100%; overflow: hidden; }
+    input[type="file"] { flex: 1 1 auto; max-width: 100%; overflow: hidden; background-color: #f3f3f3;}
 
     .btn {
       appearance: none; -webkit-appearance: none;
@@ -148,8 +181,9 @@
       cursor: pointer;
       white-space: nowrap;
       font-size: 16px;
+      width: 100%;
     }
-    .btn.primary { background: #FFE500; color: #000; width: 100%; }
+    .btn.primary { background: #FFE500; color: #000; width: 100%; box-shadow: none;}
     .btn:focus-visible { box-shadow: var(--ui-shadow); outline: 0; }
     .btn:focus, .btn:active { outline: 0; border: 0; }
     .btn.small { font-size: 16px; padding: 6px 10px; }
@@ -161,17 +195,32 @@
     .fieldHead strong { font-size: 16px; font-weight: 400; }
 
     .divider { height: 0; border: 0; margin: 16px 0; border-bottom: #eeeeee 1px solid; }
+
+    /* Header should be same width as controls panel */
+    #controls > header {
+      width: 100%;
+      margin: 0 0 10px;
+      background: none;
+      box-shadow: none;
+    }
+
+    #controls > header .header-logo {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <img src="s-r.svg" alt="Social Media Tool" class="header-logo" />
-</header>
-
 <div class="wrap">
   <!-- Left: controls -->
   <section class="panel" id="controls">
+    <header>
+      <img src="s-r.svg" alt="Social Media Tool" class="header-logo" />
+    </header>
+    <hr class="divider">
     <h2>Format</h2>
     <div class="row">
       <select id="formatSelect">
@@ -185,7 +234,7 @@
     <h2>Content</h2>
     <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:14px">
       <span style="font-size:16px;">1 default field + max 5 custom fields</span>
-      <button id="addField" class="btn" style="background-color:#FFE500;color:#000;">+ Add field</button>
+      <button id="addField" class="btn" style="background-color:#f3f3f3;color:#000;">+ Add field</button>
     </div>
     <div id="fields" class="grid"></div>
 
@@ -194,10 +243,12 @@
     <h2>Actions</h2>
     <div class="row">
       <label>Randomize</label>
-      <button id="shuffle" class="btn">Shuffle colors/sizes</button>
+      <button id="shuffle" class="btn"  style="background-color:#f3f3f3;">Shuffle colors/sizes</button>
     </div>
+
+    <hr class="divider">
+    <h2>Background</h2>
     <div class="row">
-      <label>Background</label>
       <input id="bgFile" type="file" accept="image/*" />
     </div>
     <div class="row">
@@ -205,7 +256,7 @@
       <button id="whiteBg" class="btn">White BG</button>
       <button id="clearBg" class="btn">Clear</button>
     </div>
-
+    <hr class="divider">
     <h2>Export</h2>
     <div class="row">
       <button id="download" class="btn primary">Download PNG</button>

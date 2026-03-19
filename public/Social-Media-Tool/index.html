@@ -272,15 +272,11 @@
 
 <script>
 // ====== Configuration ======
-// Logical canvas dimensions (used for preview scaling & layout math)
 const FORMATS = {
   post:  { w: 1080, h: 1350 },
   story: { w: 1080, h: 1920 }
 };
 
-// Export pixel dimensions (pixelDensity × logical size)
-// Post:  1080 × 3 = 3240 wide, 1350 × 3 = 4050 tall
-// Story: 1080 × 3 = 3240 wide, 1920 × 3 = 5760 tall
 const EXPORT_PIXEL_DENSITY = 3;
 
 let currentFormat = 'post';
@@ -289,7 +285,7 @@ let CANVAS_H = 1350;
 let DISPLAY_SCALE = 1;
 const CANVAS_PADDING = 16;
 
-const PALETTE = ["#3AEA00","#FF6A00","#FFE500","#3B9DFF","#DF61BD"];
+const PALETTE = ["#3AEA00", "#FF6A00", "#FFE500", "#3B9DFF", "#DF61BD"];
 
 const SIZE_PRESETS = {
   S: { text: 64,  padX: 30, padY: 20, r: 70  },
@@ -302,7 +298,7 @@ let fields = [];
 let bgImg = null;
 let bgColor = 255;
 
-// ====== Display scale — fit canvas inside its column ======
+// ====== Display scale ======
 function recalcDisplayScale() {
   const isMobile = window.innerWidth <= 680;
 
@@ -313,10 +309,10 @@ function recalcDisplayScale() {
     availH = window.innerHeight * 0.65;
   } else {
     const HEADER_H = 64;
-    const GAP      = 18;
-    const PADDING  = 18;
-    const panelW   = (window.innerWidth <= 1100 ? 300 : 360) + GAP;
-    availW = window.innerWidth  - panelW - PADDING * 2 - GAP;
+    const GAP = 18;
+    const PADDING = 18;
+    const panelW = (window.innerWidth <= 1100 ? 300 : 360) + GAP;
+    availW = window.innerWidth - panelW - PADDING * 2 - GAP;
     availH = window.innerHeight - HEADER_H - PADDING * 2;
   }
 
@@ -325,9 +321,62 @@ function recalcDisplayScale() {
   DISPLAY_SCALE = Math.min(scaleW, scaleH, 1);
 }
 
+// ====== Export helpers ======
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function getExportDensity() {
+  if (!isMobileDevice()) return EXPORT_PIXEL_DENSITY;
+  return 2;
+}
+
+async function exportCanvasAsPng(canvas, filename) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        reject(new Error('Canvas export failed'));
+        return;
+      }
+
+      try {
+        const file = new File([blob], filename, { type: 'image/png' });
+
+        if (
+          navigator.canShare &&
+          navigator.share &&
+          navigator.canShare({ files: [file] })
+        ) {
+          await navigator.share({
+            files: [file],
+            title: filename
+          });
+          resolve();
+          return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    }, 'image/png');
+  });
+}
+
 // ====== p5 lifecycle ======
 function preload() {
-  fontTimes = loadFont('./TimesDotRom.otf',
+  fontTimes = loadFont(
+    './TimesDotRom.otf',
     () => console.log('Font loaded'),
     () => { fontTimes = null; }
   );
@@ -338,8 +387,7 @@ function setup() {
 
   const cnv = createCanvas(CANVAS_W * DISPLAY_SCALE, CANVAS_H * DISPLAY_SCALE);
   cnv.parent('canvas-holder');
-  // Display canvas uses density 1 — the DISPLAY_SCALE already handles sizing.
-  // Export uses its own graphics buffer with EXPORT_PIXEL_DENSITY.
+
   pixelDensity(3);
 
   if (fontTimes) textFont(fontTimes);
@@ -365,14 +413,14 @@ function setup() {
   });
 }
 
-function draw() { /* intentionally empty */ }
+function draw() {}
 
 // ====== Drawing (preview) ======
 function drawContent() {
   push();
   scale(DISPLAY_SCALE);
   _renderScene(
-    window,    // use global p5 functions
+    window,
     CANVAS_W,
     CANVAS_H,
     CANVAS_PADDING,
@@ -385,69 +433,89 @@ function drawContent() {
 }
 
 // ====== Shared render logic ======
-// Works for both the preview canvas (global p5) and export graphics buffer.
-// `ctx` is either the global p5 instance (window) or a p5.Graphics object.
 function _renderScene(ctx, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
   const isGlobal = (ctx === window);
 
-  // Helper shims so we can call ctx.background() or background() uniformly
-  const bg      = isGlobal ? (v)       => background(v)          : (v)       => ctx.background(v);
-  const clr     = isGlobal ? ()        => clear()                : ()        => ctx.clear();
-  const img_    = isGlobal ? (...a)    => image(...a)            : (...a)    => ctx.image(...a);
-  const noStr   = isGlobal ? ()        => noStroke()             : ()        => ctx.noStroke();
-  const fill_   = isGlobal ? (v)       => fill(v)               : (v)       => ctx.fill(v);
-  const rect_   = isGlobal ? (...a)    => rect(...a)            : (...a)    => ctx.rect(...a);
-  const tAlign  = isGlobal ? (h, v)    => textAlign(h, v)       : (h, v)    => ctx.textAlign(h, v);
-  const tFont   = isGlobal ? (f)       => textFont(f)           : (f)       => ctx.textFont(f);
-  const tSize   = isGlobal ? (s)       => textSize(s)           : (s)       => ctx.textSize(s);
-  const tWidth  = isGlobal ? (s)       => textWidth(s)          : (s)       => ctx.textWidth(s);
-  const txt_    = isGlobal ? (...a)    => text(...a)            : (...a)    => ctx.text(...a);
+  const bg = isGlobal ? (v) => background(v) : (v) => ctx.background(v);
+  const clr = isGlobal ? () => clear() : () => ctx.clear();
+  const img_ = isGlobal ? (...a) => image(...a) : (...a) => ctx.image(...a);
+  const noStr = isGlobal ? () => noStroke() : () => ctx.noStroke();
+  const fill_ = isGlobal ? (v) => fill(v) : (v) => ctx.fill(v);
+  const rect_ = isGlobal ? (...a) => rect(...a) : (...a) => ctx.rect(...a);
+  const tAlign = isGlobal ? (h, v) => textAlign(h, v) : (h, v) => ctx.textAlign(h, v);
+  const tFont = isGlobal ? (f) => textFont(f) : (f) => ctx.textFont(f);
+  const tSize = isGlobal ? (s) => textSize(s) : (s) => ctx.textSize(s);
+  const tWidth = isGlobal ? (s) => textWidth(s) : (s) => ctx.textWidth(s);
+  const txt_ = isGlobal ? (...a) => text(...a) : (...a) => ctx.text(...a);
 
   const CONTENT_W = CW - PAD * 2;
   const CONTENT_H = CH - PAD * 2;
 
-  // Background
   if (_bgImg) {
     const scl = Math.max(CW / _bgImg.width, CH / _bgImg.height);
-    img_(_bgImg,
-      (CW - _bgImg.width  * scl) / 2,
+    img_(
+      _bgImg,
+      (CW - _bgImg.width * scl) / 2,
       (CH - _bgImg.height * scl) / 2,
-      _bgImg.width * scl, _bgImg.height * scl);
+      _bgImg.width * scl,
+      _bgImg.height * scl
+    );
   } else {
     if (_bgColor !== null) bg(_bgColor);
     else clr();
   }
 
-  // Measure fields
   const measures = _fields.map(f => {
     const preset = SIZE_PRESETS[f.size || 'M'];
     tFont(font || 'Times New Roman');
     tSize(preset.text);
+
     const txt = f.text || '';
     const lines = _wrapText(tWidth, txt, CONTENT_W - preset.padX * 2);
-    const w = Math.min(tWidth(txt) + preset.padX * 2, CONTENT_W);
+
+    let maxLineWidth = 0;
+    for (const line of lines) {
+      maxLineWidth = Math.max(maxLineWidth, tWidth(line));
+    }
+
+    const w = Math.min(maxLineWidth + preset.padX * 2, CONTENT_W);
     const h = lines.length * preset.text * 1.2 + preset.padY * 2;
-    return { field: f, lines, w, h, r: preset.r, tsize: preset.text, padX: preset.padX, padY: preset.padY };
+
+    return {
+      field: f,
+      lines,
+      w,
+      h,
+      r: preset.r,
+      tsize: preset.text,
+      padX: preset.padX,
+      padY: preset.padY
+    };
   });
 
-  // Arrange into rows
   const rows = [];
-  let row = [], rowW = 0;
+  let row = [];
+  let rowW = 0;
+
   for (const item of measures) {
     if (rowW + item.w > CONTENT_W && row.length > 0) {
-      rows.push(row); row = [item]; rowW = item.w;
+      rows.push(row);
+      row = [item];
+      rowW = item.w;
     } else {
-      row.push(item); rowW += item.w;
+      row.push(item);
+      rowW += item.w;
     }
   }
+
   if (row.length) rows.push(row);
 
   const totalH = rows.reduce((sum, r) => sum + Math.max(...r.map(i => i.h)), 0);
   let y = PAD + (CONTENT_H - totalH) / 2;
 
   for (const row of rows) {
-    const rW  = row.reduce((s, i) => s + i.w, 0);
-    const rH  = Math.max(...row.map(i => i.h));
+    const rW = row.reduce((s, i) => s + i.w, 0);
+    const rH = Math.max(...row.map(i => i.h));
     let x = PAD + (CONTENT_W - rW) / 2;
 
     for (const item of row) {
@@ -468,20 +536,28 @@ function _renderScene(ctx, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
       item.lines.forEach((line, k) => txt_(line, x + item.w / 2, ty + k * lh));
       x += item.w;
     }
+
     y += rH;
   }
 }
 
 function _wrapText(twFn, txt, maxWidth) {
   if (!txt) return [''];
+
   const words = txt.split(' ');
   const lines = [];
   let cur = '';
+
   for (const word of words) {
     const test = cur ? cur + ' ' + word : word;
-    if (twFn(test) > maxWidth && cur) { lines.push(cur); cur = word; }
-    else cur = test;
+    if (twFn(test) > maxWidth && cur) {
+      lines.push(cur);
+      cur = word;
+    } else {
+      cur = test;
+    }
   }
+
   if (cur) lines.push(cur);
   return lines.length ? lines : [''];
 }
@@ -497,21 +573,44 @@ function changeFormat(format) {
 }
 
 // ====== Field helpers ======
-function randColor() { return PALETTE[Math.floor(Math.random() * PALETTE.length)]; }
-function randSize()  { return ['S','M'][Math.floor(Math.random() * 2)]; }
+function randColor() {
+  return PALETTE[Math.floor(Math.random() * PALETTE.length)];
+}
+
+function randSize() {
+  return ['S', 'M'][Math.floor(Math.random() * 2)];
+}
 
 function addNewField() {
-  if (fields.filter(f => !f.isDefault).length >= 5) { alert('Maximum 5 custom fields'); return; }
-  fields.push({ id: Math.random().toString(36).slice(2), text: 'New Field', size: randSize(), color: randColor(), isDefault: false });
+  if (fields.filter(f => !f.isDefault).length >= 5) {
+    alert('Maximum 5 custom fields');
+    return;
+  }
+
+  fields.push({
+    id: Math.random().toString(36).slice(2),
+    text: 'New Field',
+    size: randSize(),
+    color: randColor(),
+    isDefault: false
+  });
+
   refreshFieldRows();
   drawContent();
 }
 
-function removeField(id) { fields = fields.filter(f => f.id !== id); refreshFieldRows(); drawContent(); }
+function removeField(id) {
+  fields = fields.filter(f => f.id !== id);
+  refreshFieldRows();
+  drawContent();
+}
 
 function updateField(id, prop, value) {
   const f = fields.find(f => f.id === id);
-  if (f) { f[prop] = prop === 'text' ? value.slice(0, 50) : value; drawContent(); }
+  if (!f) return;
+
+  f[prop] = prop === 'text' ? value.slice(0, 50) : value;
+  drawContent();
 }
 
 // ====== UI Setup ======
@@ -520,49 +619,96 @@ function setupUI() {
   document.getElementById('addField').onclick = addNewField;
 
   document.getElementById('shuffle').onclick = () => {
-    fields.forEach(f => { if (!f.isDefault) { f.size = randSize(); f.color = randColor(); } });
-    refreshFieldRows(); drawContent();
+    fields.forEach(f => {
+      if (!f.isDefault) {
+        f.size = randSize();
+        f.color = randColor();
+      }
+    });
+    refreshFieldRows();
+    drawContent();
   };
 
   document.getElementById('bgFile').onchange = e => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+
     const url = URL.createObjectURL(file);
-    loadImage(url, img => { bgImg = img; bgColor = null; drawContent(); URL.revokeObjectURL(url); });
+    loadImage(url, img => {
+      bgImg = img;
+      bgColor = null;
+      drawContent();
+      URL.revokeObjectURL(url);
+    });
   };
 
-  document.getElementById('whiteBg').onclick = () => { bgImg = null; bgColor = 255; drawContent(); };
-  document.getElementById('clearBg').onclick  = () => { bgImg = null; bgColor = 255; drawContent(); };
+  document.getElementById('whiteBg').onclick = () => {
+    bgImg = null;
+    bgColor = 255;
+    drawContent();
+  };
 
-  // ── Export at full pixel density ──────────────────────────────────────────
-  // Post:  pixelDensity(3) × 1080×1350  → 3240 × 4050 px
-  // Story: pixelDensity(3) × 1080×1920  → 3240 × 5760 px
-  document.getElementById('download').onclick = () => {
-    const g = createGraphics(CANVAS_W, CANVAS_H);
-    g.pixelDensity(EXPORT_PIXEL_DENSITY);
-    g.textFont(fontTimes || 'Times New Roman');
+  document.getElementById('clearBg').onclick = () => {
+    bgImg = null;
+    bgColor = null;
+    drawContent();
+  };
 
-    // Render into the off-screen buffer using graphics methods directly
-    _renderSceneGraphics(g, CANVAS_W, CANVAS_H, CANVAS_PADDING, bgImg, bgColor, fields, fontTimes);
-
+  document.getElementById('download').onclick = async () => {
+    const density = getExportDensity();
     const ts = new Date().toISOString().slice(0, 10);
-    save(g, `social-media-${currentFormat}-${ts}.png`);
-    g.remove();
+    const filename = `social-media-${currentFormat}-${ts}.png`;
+
+    let g = null;
+
+    try {
+      g = createGraphics(CANVAS_W, CANVAS_H);
+      g.pixelDensity(1);
+      g.textFont(fontTimes || 'Times New Roman');
+
+      _renderSceneGraphics(
+        g,
+        CANVAS_W,
+        CANVAS_H,
+        CANVAS_PADDING,
+        bgImg,
+        bgColor,
+        fields,
+        fontTimes
+      );
+
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = CANVAS_W * density;
+      exportCanvas.height = CANVAS_H * density;
+
+      const ctx2d = exportCanvas.getContext('2d');
+      ctx2d.scale(density, density);
+      ctx2d.drawImage(g.elt, 0, 0);
+
+      await exportCanvasAsPng(exportCanvas, filename);
+    } catch (err) {
+      console.error(err);
+      alert('Download failed on this browser/device.');
+    } finally {
+      if (g) g.remove();
+    }
   };
 }
 
 // ====== Graphics-buffer render (export) ======
-// Uses g.xxx() methods throughout — no global p5 calls.
 function _renderSceneGraphics(g, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
   const CONTENT_W = CW - PAD * 2;
   const CONTENT_H = CH - PAD * 2;
 
   if (_bgImg) {
     const scl = Math.max(CW / _bgImg.width, CH / _bgImg.height);
-    g.image(_bgImg,
-      (CW - _bgImg.width  * scl) / 2,
+    g.image(
+      _bgImg,
+      (CW - _bgImg.width * scl) / 2,
       (CH - _bgImg.height * scl) / 2,
-      _bgImg.width * scl, _bgImg.height * scl);
+      _bgImg.width * scl,
+      _bgImg.height * scl
+    );
   } else {
     if (_bgColor !== null) g.background(_bgColor);
     else g.clear();
@@ -572,22 +718,45 @@ function _renderSceneGraphics(g, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
     const preset = SIZE_PRESETS[f.size || 'M'];
     g.textFont(font || 'Times New Roman');
     g.textSize(preset.text);
+
     const txt = f.text || '';
     const lines = _wrapText(s => g.textWidth(s), txt, CONTENT_W - preset.padX * 2);
-    const w = Math.min(g.textWidth(txt) + preset.padX * 2, CONTENT_W);
+
+    let maxLineWidth = 0;
+    for (const line of lines) {
+      maxLineWidth = Math.max(maxLineWidth, g.textWidth(line));
+    }
+
+    const w = Math.min(maxLineWidth + preset.padX * 2, CONTENT_W);
     const h = lines.length * preset.text * 1.2 + preset.padY * 2;
-    return { field: f, lines, w, h, r: preset.r, tsize: preset.text, padX: preset.padX, padY: preset.padY };
+
+    return {
+      field: f,
+      lines,
+      w,
+      h,
+      r: preset.r,
+      tsize: preset.text,
+      padX: preset.padX,
+      padY: preset.padY
+    };
   });
 
   const rows = [];
-  let row = [], rowW = 0;
+  let row = [];
+  let rowW = 0;
+
   for (const item of measures) {
     if (rowW + item.w > CONTENT_W && row.length > 0) {
-      rows.push(row); row = [item]; rowW = item.w;
+      rows.push(row);
+      row = [item];
+      rowW = item.w;
     } else {
-      row.push(item); rowW += item.w;
+      row.push(item);
+      rowW += item.w;
     }
   }
+
   if (row.length) rows.push(row);
 
   const totalH = rows.reduce((sum, r) => sum + Math.max(...r.map(i => i.h)), 0);
@@ -609,12 +778,14 @@ function _renderSceneGraphics(g, CW, CH, PAD, _bgImg, _bgColor, _fields, font) {
       g.textFont(font || 'Times New Roman');
       g.textSize(item.tsize);
 
-      const lh = item.tsize * 1.2;
+      const lh = item.tsize * 0.96;
       const tbH = item.lines.length * lh;
       const ty = y + (item.h - tbH) / 2 + lh / 2 - item.tsize * 0.05;
+
       item.lines.forEach((line, k) => g.text(line, x + item.w / 2, ty + k * lh));
       x += item.w;
     }
+
     y += rH;
   }
 }
@@ -628,54 +799,74 @@ function renderFieldRow(f) {
 
   const head = document.createElement('div');
   head.className = 'fieldHead';
+
   const title = document.createElement('strong');
   title.textContent = f.isDefault ? 'Default Field (White, Size L)' : 'Custom Field';
   head.appendChild(title);
 
   if (!f.isDefault) {
     const btn = document.createElement('button');
-    btn.className = 'btn small'; btn.textContent = 'Remove';
+    btn.className = 'btn small';
+    btn.textContent = 'Remove';
     btn.onclick = () => removeField(f.id);
     head.appendChild(btn);
   }
 
-  const row1 = document.createElement('div'); row1.className = 'row';
-  const lab1 = document.createElement('label'); lab1.textContent = 'Text';
+  const row1 = document.createElement('div');
+  row1.className = 'row';
+
+  const lab1 = document.createElement('label');
+  lab1.textContent = 'Text';
+
   const inp = document.createElement('input');
-  inp.type = 'text'; inp.maxLength = 50; inp.value = f.text || '';
+  inp.type = 'text';
+  inp.maxLength = 50;
+  inp.value = f.text || '';
   inp.placeholder = 'Enter text (max 50)';
   inp.oninput = e => updateField(f.id, 'text', e.target.value);
-  row1.appendChild(lab1); row1.appendChild(inp);
+
+  row1.appendChild(lab1);
+  row1.appendChild(inp);
 
   el.appendChild(head);
   el.appendChild(row1);
 
   if (!f.isDefault) {
-    const row2 = document.createElement('div'); row2.className = 'row';
+    const row2 = document.createElement('div');
+    row2.className = 'row';
 
-    const lab2 = document.createElement('label'); lab2.textContent = 'Color';
+    const lab2 = document.createElement('label');
+    lab2.textContent = 'Color';
+
     const colorSel = document.createElement('select');
     PALETTE.forEach(c => {
       const o = document.createElement('option');
-      o.value = c; o.textContent = c.replace('#','');
+      o.value = c;
+      o.textContent = c.replace('#', '');
       if (f.color === c) o.selected = true;
       colorSel.appendChild(o);
     });
     colorSel.onchange = e => updateField(f.id, 'color', e.target.value);
 
     const lab3 = document.createElement('label');
-    lab3.style.cssText = 'min-width:36px;text-align:right'; lab3.textContent = 'Size';
+    lab3.style.cssText = 'min-width:36px;text-align:right';
+    lab3.textContent = 'Size';
+
     const sizeSel = document.createElement('select');
-    ['S','M'].forEach(s => {
+    ['S', 'M'].forEach(s => {
       const o = document.createElement('option');
-      o.value = s; o.textContent = s;
+      o.value = s;
+      o.textContent = s;
       if (f.size === s) o.selected = true;
       sizeSel.appendChild(o);
     });
     sizeSel.onchange = e => updateField(f.id, 'size', e.target.value);
 
-    row2.appendChild(lab2); row2.appendChild(colorSel);
-    row2.appendChild(lab3); row2.appendChild(sizeSel);
+    row2.appendChild(lab2);
+    row2.appendChild(colorSel);
+    row2.appendChild(lab3);
+    row2.appendChild(sizeSel);
+
     el.appendChild(row2);
   }
 
